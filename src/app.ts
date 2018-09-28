@@ -64,24 +64,24 @@ export class App {
         description: 'Searches the web for user provided queries. Keywords can be set and used to restrict results to certain sites.',
         fields: [
           {
-            name: `${botPrefix}help, ${botPrefix}?`,
+            name: `\`${botPrefix}help, ${botPrefix}?\``,
             value: `Displays the bot's help.`
           },
           {
-            name: `${botPrefix}list, ${botPrefix}ls`,
+            name: `\`${botPrefix}list, ${botPrefix}ls\``,
             value: `Displays all available keywords.`
           },
           {
-            name: `${botPrefix}set {keyword} {siteUrl}`,
-            value: `Sets a site url to a keyword. Example: ${botPrefix}set yt youtube.com.`
+            name: `\`${botPrefix}set {keyword} {siteUrl}\``,
+            value: `Sets a site url to a keyword. Example: \`${botPrefix}set yt youtube.com\`.`
           },
           {
-            name: `${botPrefix}{keyword} {query}`,
-            value: `Returns the first search result matching a query on the site corresponding to a keyword. Example: ${botPrefix}yt GMM.`
+            name: `\`${botPrefix}{keyword} {query}\``,
+            value: `Returns the first search result matching a query on the site corresponding to a keyword. Example: \`${botPrefix}yt GMM\`.`
           },
           {
-            name: `${botPrefix}search {query}`,
-            value: `Returns the first search result matching a query on any site. Example: ${botPrefix}search potato.`
+            name: `\`${botPrefix}search {query}\`, \`${botPrefix}s {query}\``,
+            value: `Returns the first search result matching a query on any site. Example: \`${botPrefix}search discord bots\`.`
           }
         ]
       }
@@ -97,7 +97,7 @@ export class App {
         sites.forEach((site) => {
           list += `**${site.keyword}** (${site.url})\n`
         });
-        list = list.substring(0, list.length - 2); // remove last line break
+        list = list.substring(0, list.length - 1); // remove last line break
 
         this.queryBot.sendMessage({
           to: channelID,
@@ -111,7 +111,7 @@ export class App {
       } else {
         this.queryBot.sendMessage({
           to: channelID,
-          message: `No keywords available. Use command '${botPrefix}help' to see how to add one.`
+          message: `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`
         });
       }
 
@@ -138,20 +138,27 @@ export class App {
   private query(channelID: string, serverId: number, input: string): void {
     const parameters: string[] = input.split(' ');
     if (parameters.length >= 2) {
-      const keyword: string = parameters.slice(0, 1)[0];
+      const keyword: string = parameters.splice(0, 1)[0];
       const search: string = parameters.join(' ');
 
-      this.searchProvider.search(serverId, search, keyword === 'search' ? undefined : keyword).subscribe((result) => {
+      const genericSearch: boolean = keyword === 'search' || keyword === 's';
+
+      this.searchProvider.search(serverId, search, genericSearch ? undefined : keyword).subscribe((result) => {
         this.queryBot.sendMessage({
           to: channelID,
           embed: {
             color: botColor,
-            title: 'This is what I found:',
+            title: `This is what I found:`,
             description: `[${result.title}](${result.url})`
           }
         });
       }, (error) => {
         console.error(error);
+
+        this.queryBot.sendMessage({
+          to: channelID,
+          message: `My apologies. I had some trouble processing your request.`
+        });
       });
 
     } else {

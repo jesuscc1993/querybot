@@ -59,15 +59,20 @@ export class SearchProvider {
 
       query += search;
 
-      scraper.search({ query: query, limit: 1 }, (error: Error, url: string, metadata: any) => {
-        if (error) {
-          throw error;
+      try {
+        scraper.search({ query: query, limit: 1 }, (error: Error, resultUrl: string, result: any) => {
+          if (error) {
+            observer.error(error);
 
-        } else {
-          observer.next(Object.assign({ url: url }, metadata));
-          observer.complete();
-        }
-      });
+          } else {
+            observer.next(result);
+            observer.complete();
+          }
+        });
+
+      } catch (error) {
+        observer.error(error);
+      }
     });
   }
 

@@ -38,10 +38,10 @@ Sets a site url to a keyword. Example: `!set yt youtube.com`.
 `!{keyword} {query}`  
 Returns the first search result matching a query on the site corresponding to a keyword. Example: `!yt GMM`.
 
-`!search {query}`  
-Returns the first search result matching a query on any site. Example: `!search potato`.
+`!search {query}, !s {query}`  
+Returns the first search result matching a query on any site. Example: `!search discord bots`.
 
 ## TODO
 
-Persist set keywords.
-They are currently only stored in memory and so lost between runs.
+* Persist set keywords, which are currently only stored in memory and so lost between runs.
+* Fix [issue](https://github.com/thibauts/node-google-search-scraper/issues/13) with the scraping library not working when the first search result is a map.
