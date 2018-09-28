@@ -1,0 +1,21 @@
+{
+  "name": "querybot",
+  "version": "1.0.0",
+  "description": "Provides web search functionalities with custom scopes",
+  "main": "build/app.js",
+  "scripts": {
+    "build": "tsc",
+    "serve": "node build/app.js",
+    "start": "tsc && npm run serve"
+  },
+  "dependencies": {
+    "@types/es6-shim": "^0.31.37",
+    "@types/lodash": "^4.14.116",
+    "@types/node": "^7.0.7",
+    "discord.io": "github:woor/discord.io#gateway_v6",
+    "google-search-scraper": "^0.1.0",
+    "lodash": "^4.17.11",
+    "rxjs": "^6.3.2",
+    "typescript": "^3.0.3"
+  }
+}
