@@ -2,4 +2,4 @@
 npm-debug.log
 /build
 /node_modules
-/settings/settings.ts
+/src/settings/settings.ts
