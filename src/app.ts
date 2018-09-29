@@ -1,52 +1,78 @@
-import { authToken, botColor, botPrefix } from './settings/settings';
-import { SearchProvider } from './providers/search/search.provider';
+import { Observable } from 'rxjs';
+import { Client } from 'discord.io';
+
+import { SearchProvider, Site } from './providers/search/search.provider';
 import { SearchResult } from './providers/search-scrapper/search-scraper';
+import { DataAccessService } from './providers/data-access/data-access.service';
+
+import { authToken, botColor, botPrefix, connectionSettings } from './settings/settings';
 
 const Discord = require('discord.io');
 
 export class App {
 
-  private queryBot = new Discord.Client({
-    token: authToken,
-    autorun: true
-  });
-
   private searchProvider: SearchProvider = new SearchProvider();
+  private dataAccessService: DataAccessService = new DataAccessService();
+
+  private queryBot: Client;
 
   public initialize(): void {
-    this.queryBot.on('ready', (event: any) => {
+    this.initializeDatabase().subscribe(() => {
+
+      this.queryBot = new Discord.Client({
+        token: authToken,
+        autorun: true
+      });
+
+      this.queryBot.on('ready', (event: any) => {
+
+      });
+
+      this.queryBot.on('message', (user: string, userID: string, channelID: string, message: string, event: any) => {
+        if (message.substring(0, botPrefix.length) === botPrefix) {
+          let input: string = message.substring(botPrefix.length);
+          const command: string = input.split(' ')[0];
+          const parameters: string[] = this.getParametersFromInput(input);
+
+          const serverId: number = event.d.guild_id;
+
+          switch (command) {
+            case 'help':
+              this.displayHelp(channelID);
+              break;
+            case '?':
+              this.displayHelp(channelID);
+              break;
+            case 'list':
+              this.listSites(channelID, serverId, parameters);
+              break;
+            case 'ls':
+              this.listSites(channelID, serverId, parameters);
+              break;
+            case 'set':
+              this.setKeyword(channelID, serverId, parameters);
+              break;
+            default:
+              this.query(channelID, serverId, input);
+              break;
+          }
+        }
+      });
 
     });
+  }
 
-    this.queryBot.on('message', (user: string, userID: string, channelID: string, message: string, event: any) => {
-      if (message.substring(0, botPrefix.length) === botPrefix) {
-        let input: string = message.substring(botPrefix.length);
-        const command: string = input.split(' ')[0];
-        const parameters: string[] = this.getParametersFromInput(input);
+  private initializeDatabase(): Observable<any> {
+    return new Observable((observer) => {
+      this.dataAccessService.connect(connectionSettings).subscribe(() => {
+        console.log(`Database connection successfully established`);
 
-        const serverId: number = event.d.guild_id;
+        observer.next();
+        observer.complete();
 
-        switch (command) {
-          case 'help':
-            this.displayHelp(channelID);
-            break;
-          case '?':
-            this.displayHelp(channelID);
-            break;
-          case 'list':
-            this.listSites(channelID, serverId, parameters);
-            break;
-          case 'ls':
-            this.listSites(channelID, serverId, parameters);
-            break;
-          case 'set':
-            this.setKeyword(channelID, serverId, parameters);
-            break;
-          default:
-            this.query(channelID, serverId, input);
-            break;
-        }
-      }
+      }, (error: Error) => {
+        observer.error(error);
+      });
     });
   }
 
@@ -91,30 +117,31 @@ export class App {
 
   private listSites(channelID: string, serverId: number, parameters: string[]): void {
     if (parameters.length === 0) {
-      const sites: any[] = this.searchProvider.getSites(serverId);
 
-      if (sites.length) {
-        let list: string = '';
-        sites.forEach((site) => {
-          list += `**${site.keyword}** (${site.url})\n`
-        });
-        list = list.substring(0, list.length - 1); // remove last line break
+      this.searchProvider.getSitesAsArray(serverId).subscribe((sites: Site[]) => {
+        if (sites.length) {
+          let list: string = '';
+          sites.forEach((site) => {
+            list += `• **${site.keyword}** (${site.url})\n`
+          });
+          list = list.substring(0, list.length - 1); // remove last line break
 
-        this.queryBot.sendMessage({
-          to: channelID,
-          embed: {
-            color: botColor,
-            title: 'Available keywords',
-            description: `${list}`
-          }
-        });
+          this.queryBot.sendMessage({
+            to: channelID,
+            embed: {
+              color: botColor,
+              title: 'Available keywords',
+              description: `${list}`
+            }
+          });
 
-      } else {
-        this.queryBot.sendMessage({
-          to: channelID,
-          message: `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`
-        });
-      }
+        } else {
+          this.queryBot.sendMessage({
+            to: channelID,
+            message: `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`
+          });
+        }
+      });
 
     } else {
       this.onWrongParameterCount(channelID);
@@ -125,10 +152,11 @@ export class App {
     if (parameters.length === 2) {
       const keyword: string = parameters[0];
       const site: string = parameters[1];
-      this.searchProvider.addSite(serverId, keyword, site);
-      this.queryBot.sendMessage({
-        to: channelID,
-        message: `Successfully set site **${site}** to keyword **${keyword}**.`
+      this.searchProvider.addSite(serverId, keyword, site).subscribe((site) => {
+        this.queryBot.sendMessage({
+          to: channelID,
+          message: `Successfully set site **${site}** to keyword **${keyword}**.`
+        });
       });
 
     } else {
