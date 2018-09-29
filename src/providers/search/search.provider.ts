@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, Observer } from 'rxjs';
 
 import { SearchResult, SearchScraper } from '../search-scrapper/search-scraper';
 
@@ -40,7 +40,7 @@ export class SearchProvider {
   }
 
   public search(serverId: number, search: string, keyword?: string): Observable<SearchResult[]> {
-    return new Observable((observer) => {
+    return new Observable((observer: Observer<SearchResult[]>) => {
       let query: string = '';
 
       if (keyword) {

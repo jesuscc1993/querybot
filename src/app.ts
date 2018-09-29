@@ -1,5 +1,6 @@
 import { authToken, botColor, botPrefix } from './settings/settings';
 import { SearchProvider } from './providers/search/search.provider';
+import { SearchResult } from './providers/search-scrapper/search-scraper';
 
 const Discord = require('discord.io');
 
@@ -143,7 +144,7 @@ export class App {
 
       const genericSearch: boolean = keyword === 'search' || keyword === 's';
 
-      this.searchProvider.search(serverId, search, genericSearch ? undefined : keyword).subscribe((results) => {
+      this.searchProvider.search(serverId, search, genericSearch ? undefined : keyword).subscribe((results: SearchResult[]) => {
         if (results.length === 1) {
           this.queryBot.sendMessage({
             to: channelID,
@@ -152,7 +153,7 @@ export class App {
 
         } else {
           let description: string = '';
-          results.forEach((result) => {
+          results.forEach((result: SearchResult) => {
             description += `• [${result.title}](${this.encodeUrl(result.url)})\n`;
           });
           description = description.substring(0, description.length - 1); // remove last line break
