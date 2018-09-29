@@ -2,7 +2,13 @@
 
 ## Description
 
-[Discord](https://discordapp.com/) bot that provides web search functionalities with custom scopes.
+[Discord](https://discordapp.com/) bot that provides web search functionalities. Keywords can be created and used to only search for results on certain websites.
+
+## Technologies
+The project runs on [node.js](https://nodejs.org/) and relies on [Mongoose](https://mongoosejs.com/) to handle data management with [MongoDB](https://www.mongodb.com/).
+
+[TypeScript](https://www.typescriptlang.org/) has been used instead of plain JS in order to facilitate a more defined and structured code that can easily highlight errors in the source code rather than at runtime.
+
 
 ## Installation
 
@@ -40,7 +46,3 @@ Returns the first search result matching a query on the site corresponding to a 
 
 `!search {query}, !s {query}`  
 Returns the first search result matching a query on any site. Example: `!search discord bots`.
-
-## TODO
-
-* Persist set keywords, which are currently only stored in memory and so lost between runs.
