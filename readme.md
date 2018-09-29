@@ -44,4 +44,3 @@ Returns the first search result matching a query on any site. Example: `!search 
 ## TODO
 
 * Persist set keywords, which are currently only stored in memory and so lost between runs.
-* Fix [issue](https://github.com/thibauts/node-google-search-scraper/issues/13) with the scraping library not working when the first search result is a map.

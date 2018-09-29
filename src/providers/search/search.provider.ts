@@ -1,19 +1,15 @@
 import { Observable } from 'rxjs';
 
-const scraper = require('google-search-scraper');
+import { SearchResult, SearchScraper } from '../search-scrapper/search-scraper';
 
 export interface Site {
   keyword: string;
   url: string;
 }
-export interface SearchResult {
-  url: string;
-  title: string;
-  meta: string;
-  desc: string;
-}
 
 export class SearchProvider {
+
+  private scraper: SearchScraper = new SearchScraper();
 
   private defaultSites: any = {
     yt: 'youtube.com',
@@ -43,7 +39,7 @@ export class SearchProvider {
     return sites;
   }
 
-  public search(serverId: number, search: string, keyword?: string): Observable<SearchResult> {
+  public search(serverId: number, search: string, keyword?: string): Observable<SearchResult[]> {
     return new Observable((observer) => {
       let query: string = '';
 
@@ -60,14 +56,12 @@ export class SearchProvider {
       query += search;
 
       try {
-        scraper.search({ query: query, limit: 1 }, (error: Error, resultUrl: string, result: any) => {
-          if (error) {
-            observer.error(error);
+        this.scraper.search({ query: query, limit: 1 }).then((results: SearchResult[]) => {
+          observer.next(results);
+          observer.complete();
 
-          } else {
-            observer.next(result);
-            observer.complete();
-          }
+        }, (error: Error) => {
+          observer.error(error);
         });
 
       } catch (error) {

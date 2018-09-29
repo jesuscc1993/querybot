@@ -1,5 +1,5 @@
 import { authToken, botColor, botPrefix } from './settings/settings';
-import { SearchProvider } from './providers/search.provider';
+import { SearchProvider } from './providers/search/search.provider';
 
 const Discord = require('discord.io');
 
@@ -143,15 +143,30 @@ export class App {
 
       const genericSearch: boolean = keyword === 'search' || keyword === 's';
 
-      this.searchProvider.search(serverId, search, genericSearch ? undefined : keyword).subscribe((result) => {
-        this.queryBot.sendMessage({
-          to: channelID,
-          embed: {
-            color: botColor,
-            title: `This is what I found:`,
-            description: `[${result.title}](${result.url})`
-          }
-        });
+      this.searchProvider.search(serverId, search, genericSearch ? undefined : keyword).subscribe((results) => {
+        if (results.length === 1) {
+          this.queryBot.sendMessage({
+            to: channelID,
+            message: results[0].url
+          });
+
+        } else {
+          let description: string = '';
+          results.forEach((result) => {
+            description += `• [${result.title}](${this.encodeUrl(result.url)})\n`;
+          });
+          description = description.substring(0, description.length - 1); // remove last line break
+
+          this.queryBot.sendMessage({
+            to: channelID,
+            embed: {
+              color: botColor,
+              title: `This is what I found:`,
+              description: description
+            }
+          });
+
+        }
       }, (error) => {
         console.error(error);
 
@@ -171,6 +186,10 @@ export class App {
       to: channelID,
       message: `Invalid parameter count`
     });
+  }
+
+  private encodeUrl(url: string): string {
+    return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
 
 }
