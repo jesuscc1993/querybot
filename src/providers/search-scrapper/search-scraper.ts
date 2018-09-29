@@ -58,7 +58,7 @@ export class SearchScraper {
         });
 
         if (results.length === 0 && options.limit !== 0) {
-          reject(new Error('No results found'));
+          reject(new Error('No results found.'));
 
         } else if (options.limit) {
           if (results.length < options.limit) {
@@ -107,7 +107,7 @@ export class SearchScraper {
           const parsed = url.parse(response.headers.location, true);
 
           if (parsed.pathname !== '/search') {
-            reject(new Error('Captcha'));
+            reject(new Error('Captcha triggered.'));
 
           } else {
             this.session.get({

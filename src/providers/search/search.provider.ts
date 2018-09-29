@@ -49,7 +49,7 @@ export class SearchProvider {
           query += `site:${site} `;
 
         } else {
-          observer.error('Invalid keyword.');
+          observer.error(new Error('Invalid keyword.'));
         }
       }
 

@@ -167,12 +167,12 @@ export class App {
           });
 
         }
-      }, (error) => {
-        console.error(error);
+      }, (error: Error) => {
+        console.error(`ERROR: ${error.message}`);
 
         this.queryBot.sendMessage({
           to: channelID,
-          message: `My apologies. I had some trouble processing your request.`
+          message: error.message || `My apologies. I had some trouble processing your request.`
         });
       });
 
