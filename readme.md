@@ -46,3 +46,6 @@ Returns the first search result matching a query on the site corresponding to a 
 
 `!search {query}, !s {query}`  
 Returns the first search result matching a query on any site. Example: `!search discord bots`.
+
+## Invite link
+[Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot)
