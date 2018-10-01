@@ -43,14 +43,14 @@ export class App {
     this.queryBot.login(botAuthToken).then();
 
     this.queryBot.on('ready', () => {
-      this.queryBot.user.setActivity(`${botPrefix}help | ${this.queryBot.guilds.size} servers`, { type: 'LISTENING' }).then();
+      this.setActivityMessage();
 
       this.queryBot.guilds.forEach((guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
     });
 
-    this.queryBot.on('guildCreate', (guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
-    this.queryBot.on('guildMemberAdd', (guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
-    this.queryBot.on('guildMemberRemove', (guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
+    this.queryBot.on('guildCreate', (guild: Guild) => this.onGuildUpdate(guild));
+    this.queryBot.on('guildMemberAdd', (guild: Guild) => this.onGuildUpdate(guild));
+    this.queryBot.on('guildMemberRemove', (guild: Guild) => this.onGuildUpdate(guild));
 
     this.queryBot.on('message', (message: Message) => {
       if (message.content.substring(0, botPrefix.length) === botPrefix) {
@@ -84,6 +84,11 @@ export class App {
     });
   }
 
+  private onGuildUpdate(guild: Guild): void {
+    this.leaveGuildWhenSuspectedAsBotFarm(guild);
+    this.setActivityMessage();
+  }
+
   private leaveGuildWhenSuspectedAsBotFarm(guild: Guild) {
     const minimumMembersCheck: number = 25;
     let botCount: number = 0;
@@ -95,6 +100,10 @@ export class App {
     if (guild.members.size > 25 && botCount * 100 / guild.members.size >= 75) {
       guild.leave().then();
     }
+  }
+
+  private setActivityMessage() {
+    this.queryBot.user.setActivity(`${botPrefix}help | ${this.queryBot.guilds.size} servers`, { type: 'LISTENING' }).then();
   }
 
   private getParametersFromInput(input: string): string[] {
