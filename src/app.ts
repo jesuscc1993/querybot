@@ -43,7 +43,7 @@ export class App {
     this.queryBot.login(botAuthToken).then();
 
     this.queryBot.on('ready', () => {
-      this.queryBot.user.setActivity(`${botPrefix}help`, { type: 'LISTENING' }).then();
+      this.queryBot.user.setActivity(`${botPrefix}help | ${this.queryBot.guilds.size} servers`, { type: 'LISTENING' }).then();
 
       this.queryBot.guilds.forEach((guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
     });
