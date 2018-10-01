@@ -25,10 +25,14 @@ export class MongooseDao {
 
   public updateDocument(source: Model<any>, documentFilters: any, document: Document): Observable<any> {
     return new Observable((observer: Observer<any>) => {
-      source.updateOne(documentFilters, document, (error: Error, returnedDocument: Document) => {
-        this.output(`Updated document\n${JSON.stringify(returnedDocument)}`);
-        observer.next(returnedDocument);
-        observer.complete();
+      source.updateOne(documentFilters, document, (error: Error) => {
+        if (error) {
+          observer.error(error);
+
+        } else {
+          observer.next(document);
+          observer.complete();
+        }
       });
     });
   }
