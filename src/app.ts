@@ -1,5 +1,5 @@
 import { Observable, Observer } from 'rxjs';
-import { Client, Message, TextChannel } from 'discord.js';
+import { Client, Guild, GuildMember, Message, TextChannel } from 'discord.js';
 
 import { SiteKeyword } from './models/site-keyword';
 
@@ -44,7 +44,13 @@ export class App {
 
     this.queryBot.on('ready', () => {
       this.queryBot.user.setActivity(`${botPrefix}help`, { type: 'LISTENING' }).then();
+
+      this.queryBot.guilds.forEach((guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
     });
+
+    this.queryBot.on('guildCreate', (guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
+    this.queryBot.on('guildMemberAdd', (guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
+    this.queryBot.on('guildMemberRemove', (guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
 
     this.queryBot.on('message', (message: Message) => {
       if (message.content.substring(0, botPrefix.length) === botPrefix) {
@@ -76,6 +82,19 @@ export class App {
         }
       }
     });
+  }
+
+  private leaveGuildWhenSuspectedAsBotFarm(guild: Guild) {
+    const minimumMembersCheck: number = 25;
+    let botCount: number = 0;
+
+    guild.members.forEach((member: GuildMember) => {
+      if (member.user.bot) botCount++;
+    });
+
+    if (guild.members.size > 25 && botCount * 100 / guild.members.size >= 75) {
+      guild.leave().then();
+    }
   }
 
   private getParametersFromInput(input: string): string[] {
