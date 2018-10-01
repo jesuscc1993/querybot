@@ -2,6 +2,10 @@
   "name": "querybot",
   "version": "1.0.0",
   "description": "Provides web search functionalities with custom scopes",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jesuscc1993/querybot"
+  },
   "main": "build/app.js",
   "scripts": {
     "build": "tsc",
