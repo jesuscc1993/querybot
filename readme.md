@@ -2,7 +2,9 @@
 
 ## Description
 
-[Discord](https://discordapp.com/) bot that provides web search functionalities. Keywords can be created and used to only search for results on certain websites.
+Bot that brings search functionalities to [Discord](https://discordapp.com/) thanks to the Google Search API.  
+Keywords can be created and used to only search for results on certain websites.  
+Bot will use safe searching when on SFW channels and full search on NSFW channels.
 
 ## Technologies
 The project runs on [node.js](https://nodejs.org/) and relies on [Mongoose](https://mongoosejs.com/) to handle data management with [MongoDB](https://www.mongodb.com/).

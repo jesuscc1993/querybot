@@ -102,9 +102,9 @@ export class ServerProvider {
     });
   }
 
-  public search(serverId: string, query: string, keyword?: string): Observable<GoogleSearchResultItem[]> {
+  public search(serverId: string, query: string, nsfw: boolean, keyword?: string): Observable<GoogleSearchResultItem[]> {
     return new Observable((observer: Observer<GoogleSearchResultItem[]>) => {
-      let searchOptions: GoogleSearchOptions = Object.assign({ num: 1 }, this.searchOptions);
+      let searchOptions: GoogleSearchOptions = Object.assign({ num: 1, safe: nsfw ? 'off' : 'active' }, this.searchOptions);
 
       const onKeywordReady: Function = () => {
         this.googleSearchProvider.search(query, searchOptions).subscribe((searchResults: GoogleSearchResultItem[]) => {

@@ -1,5 +1,5 @@
 import { Observable, Observer } from 'rxjs';
-import { Client } from 'discord.io';
+import { Client, Message, TextChannel } from 'discord.js';
 
 import { SiteKeyword } from './models/site-keyword';
 
@@ -8,7 +8,7 @@ import { GoogleSearchResultItem } from './providers/google-search/google-search.
 
 import { botAuthToken, botColor, botPrefix, databaseName, databaseUrl, googleSearchApiKey, googleSearchCx } from './settings/settings';
 
-const Discord = require('discord.io');
+const Discord = require('discord.js');
 
 export class App {
 
@@ -38,41 +38,40 @@ export class App {
   }
 
   private initializeBot() {
-    this.queryBot = new Discord.Client({
-      token: botAuthToken,
-      autorun: true
+    this.queryBot = new Discord.Client();
+
+    this.queryBot.login(botAuthToken).then();
+
+    this.queryBot.on('ready', () => {
+      this.queryBot.user.setActivity(`${botPrefix}help`, { type: 'LISTENING' }).then();
     });
 
-    this.queryBot.on('ready', (event: any) => {
-
-    });
-
-    this.queryBot.on('message', (user: string, userID: string, channelID: string, message: string, event: any) => {
-      if (message.substring(0, botPrefix.length) === botPrefix) {
-        let input: string = message.substring(botPrefix.length);
+    this.queryBot.on('message', (message: Message) => {
+      if (message.content.substring(0, botPrefix.length) === botPrefix) {
+        let input: string = message.content.substring(botPrefix.length);
         const command: string = input.split(' ')[0];
         const parameters: string[] = this.getParametersFromInput(input);
 
-        const serverId: string = event.d.guild_id;
+        const serverId: string = message.guild.id;
 
         switch (command) {
           case 'help':
-            this.displayHelp(channelID);
+            this.displayHelp(message);
             break;
           case '?':
-            this.displayHelp(channelID);
+            this.displayHelp(message);
             break;
           case 'list':
-            this.listSites(channelID, serverId, parameters);
+            this.listSites(message, parameters);
             break;
           case 'ls':
-            this.listSites(channelID, serverId, parameters);
+            this.listSites(message, parameters);
             break;
           case 'set':
-            this.setKeyword(channelID, serverId, parameters);
+            this.setKeyword(message, parameters);
             break;
           default:
-            this.query(channelID, serverId, input);
+            this.query(message, input);
             break;
         }
       }
@@ -85,9 +84,8 @@ export class App {
     return parameters;
   }
 
-  private displayHelp(channelID: string): void {
-    this.queryBot.sendMessage({
-      to: channelID,
+  private displayHelp(message: Message): void {
+    message.channel.send(undefined, {
       embed: {
         color: botColor,
         title: 'QueryBot',
@@ -115,13 +113,13 @@ export class App {
           }
         ]
       }
-    });
+    }).then();
   }
 
-  private listSites(channelID: string, serverId: string, parameters: string[]): void {
+  private listSites(message: Message, parameters: string[]): void {
     if (parameters.length === 0) {
 
-      this.sitesProvider.getServerSiteKeywords(serverId).subscribe((siteKeywords: SiteKeyword[]) => {
+      this.sitesProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords: SiteKeyword[]) => {
         if (siteKeywords.length) {
           let list: string = '';
           siteKeywords.forEach((site) => {
@@ -129,45 +127,38 @@ export class App {
           });
           list = list.substring(0, list.length - 1); // remove last line break
 
-          this.queryBot.sendMessage({
-            to: channelID,
+          message.channel.send(undefined, {
             embed: {
               color: botColor,
               title: 'Available keywords',
               description: `${list}`
             }
-          });
+          }).then();
 
         } else {
-          this.queryBot.sendMessage({
-            to: channelID,
-            message: `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`
-          });
+          message.channel.send(`No keywords available. Use command \`${botPrefix}help\` to see how to add one.`).then();
         }
       });
 
     } else {
-      this.onWrongParameterCount(channelID);
+      this.onWrongParameterCount(message);
     }
   }
 
-  private setKeyword(channelID: string, serverId: string, parameters: string[]): void {
+  private setKeyword(message: Message, parameters: string[]): void {
     if (parameters.length === 2) {
       const keyword: string = parameters[0];
       const site: string = parameters[1];
-      this.sitesProvider.addSiteKeyword(serverId, keyword, site).subscribe((site) => {
-        this.queryBot.sendMessage({
-          to: channelID,
-          message: `Successfully set site **${site}** to keyword **${keyword}**.`
-        });
+      this.sitesProvider.addSiteKeyword(message.guild.id, keyword, site).subscribe((site) => {
+        message.channel.send(`Successfully set site **${site}** to keyword **${keyword}**.`).then();
       });
 
     } else {
-      this.onWrongParameterCount(channelID);
+      this.onWrongParameterCount(message);
     }
   }
 
-  private query(channelID: string, serverId: string, input: string): void {
+  private query(message: Message, input: string): void {
     const parameters: string[] = input.split(' ');
     if (parameters.length >= 2) {
       const keyword: string = parameters.splice(0, 1)[0];
@@ -175,12 +166,9 @@ export class App {
 
       const genericSearch: boolean = keyword === 'search' || keyword === 's';
 
-      this.sitesProvider.search(serverId, search, genericSearch ? undefined : keyword).subscribe((searchResultItems: GoogleSearchResultItem[]) => {
+      this.sitesProvider.search(message.guild.id, search, (<TextChannel> message.channel).nsfw, genericSearch ? undefined : keyword).subscribe((searchResultItems: GoogleSearchResultItem[]) => {
         if (searchResultItems.length === 1) {
-          this.queryBot.sendMessage({
-            to: channelID,
-            message: searchResultItems[0].link
-          });
+          message.channel.send(searchResultItems[0].link).then();
 
         } else {
           let description: string = '';
@@ -189,35 +177,26 @@ export class App {
           });
           description = description.substring(0, description.length - 1); // remove last line break
 
-          this.queryBot.sendMessage({
-            to: channelID,
+          message.channel.send(undefined, {
             embed: {
               color: botColor,
               title: `This is what I found:`,
               description: description
             }
-          });
+          }).then();
 
         }
       }, (error: Error) => {
-        console.error(`ERROR: ${error.message}`);
-
-        this.queryBot.sendMessage({
-          to: channelID,
-          message: error.message || `My apologies. I had some trouble processing your request.`
-        });
+        message.channel.send(error.message || `My apologies. I had some trouble processing your request.`).then();
       });
 
     } else {
-      this.onWrongParameterCount(channelID);
+      this.onWrongParameterCount(message);
     }
   }
 
-  private onWrongParameterCount(channelID: string): void {
-    this.queryBot.sendMessage({
-      to: channelID,
-      message: `Invalid parameter count`
-    });
+  private onWrongParameterCount(message: Message): void {
+    message.channel.send(`Invalid parameter count`).then();
   }
 
   private encodeUrl(url: string): string {
