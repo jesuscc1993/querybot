@@ -7,3 +7,6 @@ export const databaseName: string = 'databaseName';
 
 export const googleSearchApiKey: string = 'googleSearchApiKey';
 export const googleSearchCx: string = 'googleSearchCx';
+
+export const minimumGuildMembersForFarmCheck: number = 25;
+export const maximumGuildBotsPercentage: number = 75;

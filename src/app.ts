@@ -1,12 +1,23 @@
 import { Observable, Observer } from 'rxjs';
 import { Client, Guild, GuildMember, Message, TextChannel } from 'discord.js';
+import * as _ from 'lodash';
 
 import { SiteKeyword } from './models/site-keyword';
 
 import { ServerProvider } from './providers/server/server.provider';
 import { GoogleSearchResultItem } from './providers/google-search/google-search.models';
 
-import { botAuthToken, botColor, botPrefix, databaseName, databaseUrl, googleSearchApiKey, googleSearchCx } from './settings/settings';
+import {
+  botAuthToken,
+  botColor,
+  botPrefix,
+  databaseName,
+  databaseUrl,
+  googleSearchApiKey,
+  googleSearchCx,
+  maximumGuildBotsPercentage,
+  minimumGuildMembersForFarmCheck
+} from './settings/settings';
 
 const Discord = require('discord.js');
 
@@ -15,8 +26,12 @@ export class App {
   private queryBot: Client;
   private sitesProvider: ServerProvider;
 
+  private outputEnabled: boolean;
+
   public initialize(): void {
     this.sitesProvider = new ServerProvider(googleSearchApiKey, googleSearchCx);
+
+    this.outputEnabled = true;
 
     this.initializeDatabase().subscribe(() => {
       this.initializeBot();
@@ -26,7 +41,7 @@ export class App {
   private initializeDatabase(): Observable<undefined> {
     return new Observable((observer: Observer<undefined>) => {
       this.sitesProvider.connect(databaseUrl, databaseName).subscribe(() => {
-        console.log(`Database connection successfully established`);
+        this.output(`Database connection successfully established`);
 
         observer.next(undefined);
         observer.complete();
@@ -45,12 +60,26 @@ export class App {
     this.queryBot.on('ready', () => {
       this.setActivityMessage();
 
-      this.queryBot.guilds.forEach((guild: Guild) => this.leaveGuildWhenSuspectedAsBotFarm(guild));
+      let guildNames: string[] = [];
+      this.queryBot.guilds.forEach((guild: Guild) => {
+        const leftGuild: boolean = this.leaveGuildWhenSuspectedAsBotFarm(guild);
+        if (!leftGuild) {
+          guildNames.push(guild.name);
+        }
+      });
+
+      if (guildNames.length) {
+        this.output(`Currently running on the following ${guildNames.length} server(s):\n"${guildNames.sort().join('", "')}"`);
+      }
     });
 
-    this.queryBot.on('guildCreate', (guild: Guild) => this.onGuildUpdate(guild));
+    this.queryBot.on('guildCreate', (guild: Guild) => {
+      this.output(`Joined server "${guild.name}"`);
+      this.onGuildUpdate(guild);
+    });
     this.queryBot.on('guildMemberAdd', (guild: Guild) => this.onGuildUpdate(guild));
     this.queryBot.on('guildMemberRemove', (guild: Guild) => this.onGuildUpdate(guild));
+    this.queryBot.on('guildDelete', (guild: Guild) => this.output(`Left server "${guild.name}"`));
 
     this.queryBot.on('message', (message: Message) => {
       if (message.content.substring(0, botPrefix.length) === botPrefix) {
@@ -89,17 +118,22 @@ export class App {
     this.setActivityMessage();
   }
 
-  private leaveGuildWhenSuspectedAsBotFarm(guild: Guild) {
-    const minimumMembersCheck: number = 25;
-    let botCount: number = 0;
+  private leaveGuildWhenSuspectedAsBotFarm(guild: Guild): boolean {
+    if (guild.members) {
+      let botCount: number = 0;
 
-    guild.members.forEach((member: GuildMember) => {
-      if (member.user.bot) botCount++;
-    });
+      guild.members.forEach((member: GuildMember) => {
+        if (member.user.bot) botCount++;
+      });
 
-    if (guild.members.size > 25 && botCount * 100 / guild.members.size >= 75) {
-      guild.leave().then();
+      if (guild.members.size > minimumGuildMembersForFarmCheck && botCount * 100 / guild.members.size >= maximumGuildBotsPercentage) {
+        guild.leave().then();
+        this.output(`Server "${guild.name}" has been marked as potential bot farm`);
+        return true;
+      }
     }
+
+    return false;
   }
 
   private setActivityMessage() {
@@ -150,7 +184,7 @@ export class App {
       this.sitesProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords: SiteKeyword[]) => {
         if (siteKeywords.length) {
           let list: string = '';
-          siteKeywords.forEach((site) => {
+          _.orderBy(siteKeywords, 'keyword').forEach((site) => {
             list += `• **${site.keyword}** (${site.url})\n`;
           });
           list = list.substring(0, list.length - 1); // remove last line break
@@ -229,6 +263,10 @@ export class App {
 
   private encodeUrl(url: string): string {
     return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
+  }
+
+  private output(message: string) {
+    console.log(`QueryBot: ${message}`);
   }
 
 }
