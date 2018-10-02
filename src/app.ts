@@ -43,7 +43,7 @@ export class App {
   private setupHandlers() {
     const unhandledRejections: Map<Promise<any>, string> = new Map();
     process.on('exit', (exitCode: number) => {
-      this.error(`forced exit of code: ${exitCode}`);
+      this.error(`Forced exit of code: ${exitCode}`);
     });
     process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
       unhandledRejections.set(promise, reason);
