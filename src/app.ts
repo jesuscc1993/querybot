@@ -33,8 +33,31 @@ export class App {
 
     this.outputEnabled = true;
 
+    this.setupHandlers();
+
     this.initializeDatabase().subscribe(() => {
       this.initializeBot();
+    });
+  }
+
+  private setupHandlers() {
+    const unhandledRejections: Map<Promise<any>, string> = new Map();
+    process.on('exit', (exitCode: number) => {
+      this.error(`forced exit of code: ${exitCode}`);
+    });
+    process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
+      unhandledRejections.set(promise, reason);
+      this.error(`Unhandled rejection: ${promise} ${reason}`);
+    });
+    process.on('rejectionHandled', (promise: Promise<any>) => {
+      unhandledRejections.delete(promise);
+      this.error(`Rejection handled: ${promise}`);
+    });
+    process.on('uncaughtException', (error: Error) => {
+      this.error(`Caught exception: ${error}`);
+    });
+    process.on('warning', (warning: any) => {
+      this.error(`Process warning: ${warning.name}\nMessage: ${warning.message}\nStack trace:\n${warning.trace}`);
     });
   }
 
@@ -55,7 +78,9 @@ export class App {
   private initializeBot() {
     this.queryBot = new Discord.Client();
 
-    this.queryBot.login(botAuthToken).then();
+    this.queryBot.login(botAuthToken).then(this.noop, (error: Error) => {
+      this.onError('queryBot.login', error);
+    });
 
     this.queryBot.on('ready', () => {
       this.setActivityMessage();
@@ -127,7 +152,9 @@ export class App {
       });
 
       if (guild.members.size > minimumGuildMembersForFarmCheck && botCount * 100 / guild.members.size >= maximumGuildBotsPercentage) {
-        guild.leave().then();
+        guild.leave().then(this.noop, (error: Error) => {
+          this.onError('guild.leave', error);
+        });
         this.output(`Server "${guild.name}" has been marked as potential bot farm`);
         return true;
       }
@@ -137,7 +164,9 @@ export class App {
   }
 
   private setActivityMessage() {
-    this.queryBot.user.setActivity(`${botPrefix}help | ${this.queryBot.guilds.size} servers`, { type: 'LISTENING' }).then();
+    this.queryBot.user.setActivity(`${botPrefix}help | ${this.queryBot.guilds.size} servers`, { type: 'LISTENING' }).then(this.noop, (error: Error) => {
+      this.onError('queryBot.user.setActivity', error);
+    });
   }
 
   private getParametersFromInput(input: string): string[] {
@@ -175,7 +204,7 @@ export class App {
           }
         ]
       }
-    }).then();
+    }).then(this.noop, this.error);
   }
 
   private listSites(message: Message, parameters: string[]): void {
@@ -195,10 +224,14 @@ export class App {
               title: 'Available keywords',
               description: `${list}`
             }
-          }).then();
+          }).then(this.noop, (error: Error) => {
+            this.onError('message.channel.send', error);
+          });
 
         } else {
-          message.channel.send(`No keywords available. Use command \`${botPrefix}help\` to see how to add one.`).then();
+          message.channel.send(`No keywords available. Use command \`${botPrefix}help\` to see how to add one.`).then(this.noop, (error: Error) => {
+            this.onError('message.channel.send', error);
+          });
         }
       });
 
@@ -212,7 +245,9 @@ export class App {
       const keyword: string = parameters[0];
       const site: string = parameters[1];
       this.sitesProvider.addSiteKeyword(message.guild.id, keyword, site).subscribe((site) => {
-        message.channel.send(`Successfully set site **${site}** to keyword **${keyword}**.`).then();
+        message.channel.send(`Successfully set site **${site}** to keyword **${keyword}**.`).then(this.noop, (error: Error) => {
+          this.onError('message.channel.send', error);
+        });
       });
 
     } else {
@@ -230,7 +265,9 @@ export class App {
 
       this.sitesProvider.search(message.guild.id, search, (<TextChannel> message.channel).nsfw, genericSearch ? undefined : keyword).subscribe((searchResultItems: GoogleSearchResultItem[]) => {
         if (searchResultItems.length === 1) {
-          message.channel.send(searchResultItems[0].link).then();
+          message.channel.send(searchResultItems[0].link).then(this.noop, (error: Error) => {
+            this.onError('message.channel.send', error);
+          });
 
         } else {
           let description: string = '';
@@ -245,11 +282,15 @@ export class App {
               title: `This is what I found:`,
               description: description
             }
-          }).then();
+          }).then(this.noop, (error: Error) => {
+            this.onError('message.channel.send', error);
+          });
 
         }
       }, (error: Error) => {
-        message.channel.send(error.message || `My apologies. I had some trouble processing your request.`).then();
+        message.channel.send(error || `My apologies. I had some trouble processing your request.`).then(this.noop, (error: Error) => {
+          this.onError('message.channel.send', error);
+        });
       });
 
     } else {
@@ -258,15 +299,31 @@ export class App {
   }
 
   private onWrongParameterCount(message: Message): void {
-    message.channel.send(`Invalid parameter count`).then();
+    message.channel.send(`Invalid parameter count`).then(this.noop, (error: Error) => {
+      this.onError('message.channel.send', error);
+    });
   }
 
   private encodeUrl(url: string): string {
     return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
 
-  private output(message: string) {
+  private onError(functionName: string, error: Error): Function {
+    return (error: Error) => {
+      this.error(`${error} at function ${functionName}`);
+    };
+  }
+
+  private output(message: string): void {
     console.log(`QueryBot: ${message}`);
+  }
+
+  private error(error: Error | any): void {
+    this.error(`QueryBot: ${error}`);
+  }
+
+  private noop(): void {
+
   }
 
 }
