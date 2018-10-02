@@ -319,7 +319,7 @@ export class App {
   }
 
   private error(error: Error | any): void {
-    this.error(`QueryBot: ${error}`);
+    console.error(`QueryBot: ${error}`);
   }
 
   private noop(): void {
