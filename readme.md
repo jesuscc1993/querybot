@@ -11,10 +11,11 @@ Bot that brings search functionalities to [Discord](https://discordapp.com/) tha
 * Automatically leaves servers with > 25 members where over 75% of the member total is comprised of bots (configurable).
 
 ## Technologies
-The project runs on [node.js](https://nodejs.org/) and relies on [Mongoose](https://mongoosejs.com/) to handle data management with [MongoDB](https://www.mongodb.com/).
-
-[TypeScript](https://www.typescriptlang.org/) has been used instead of plain JS in order to facilitate a more defined and structured code that can easily highlight errors in the source code rather than at runtime.
-
+* [TypeScript](https://www.typescriptlang.org/) is used to write all code and then transpiled into [JavaScript](https://www.javascript.com/)
+* [Lodash](https://lodash.com/) mostly facilitates data iteration
+* [node.js](https://nodejs.org/) runs the application
+* [Mongoose](https://mongoosejs.com/) acts as a middleware to handle data management with [MongoDB](https://www.mongodb.com/)
+* [discord.js](https://discord.js.org/#/) handles communication with the Discord API
 
 ## Installation
 
@@ -54,4 +55,4 @@ Returns the first search result matching a query on the site corresponding to a 
 Returns the first search result matching a query on any site. Example: `!search discord bots`.
 
 ## Invite link
-[Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot)
+[Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
