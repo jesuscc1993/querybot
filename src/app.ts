@@ -327,9 +327,13 @@ export class App {
   }
 
   private sendMessage(message: Message, messageContent: StringResolvable, messageOptions?: MessageOptions): void {
-    message.channel.send(messageContent, messageOptions).then(this.noop, (error) => {
-      this.onError(error, 'message.channel.send', messageContent, JSON.stringify(messageOptions));
-    });
+    if (message.guild.me.permissions.has('SEND_MESSAGES')) {
+      message.channel.send(messageContent, messageOptions).then(this.noop, (error) => {
+        this.onError(error, 'message.channel.send', messageContent, JSON.stringify(messageOptions));
+      });
+    } else {
+      message.author.send(`I don't have the permission to send messages on the server "${message.guild.name}". Please, contact the server admin to have this permission added.`);
+    }
   }
 
 }
