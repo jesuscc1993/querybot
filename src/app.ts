@@ -88,16 +88,16 @@ export class App {
     this.queryBot.on('ready', () => {
       this.setActivityMessage();
 
-      let guildNames: string[] = [];
+      let guildIdentifications: string[] = [];
       this.queryBot.guilds.forEach((guild: Guild) => {
         const leftGuild: boolean = this.leaveGuildWhenSuspectedAsBotFarm(guild);
         if (!leftGuild) {
-          guildNames.push(guild.name);
+          guildIdentifications.push(`(${guild.id}) "${guild.name}"`);
         }
       });
 
-      if (guildNames.length) {
-        this.output(`Currently running on the following ${guildNames.length} server(s):\n"${guildNames.sort().join('", "')}"`);
+      if (guildIdentifications.length) {
+        this.output(`Currently running on the following ${guildIdentifications.length} server(s):\n${guildIdentifications.sort().join('\n')}`);
       }
     });
 
@@ -170,7 +170,7 @@ export class App {
     const activityMessage: string = `${botPrefix}help | ${this.queryBot.guilds.size} servers`;
     const activityOptions: any = { type: 'LISTENING' };
     this.queryBot.user.setActivity(activityMessage, activityOptions).then(this.noop, (error: Error) => {
-      this.onError(error, 'queryBot.user.setActivity', activityMessage, activityOptions);
+      this.onError(error, 'queryBot.user.setActivity', activityMessage, JSON.stringify(activityOptions));
     });
   }
 
@@ -328,7 +328,7 @@ export class App {
 
   private sendMessage(message: Message, messageContent: StringResolvable, messageOptions?: MessageOptions): void {
     message.channel.send(messageContent, messageOptions).then(this.noop, (error) => {
-      this.onError(error, 'message.channel.send', messageContent, messageOptions);
+      this.onError(error, 'message.channel.send', messageContent, JSON.stringify(messageOptions));
     });
   }
 
