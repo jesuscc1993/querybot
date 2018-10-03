@@ -79,7 +79,7 @@ export class App {
     this.queryBot = new Discord.Client();
 
     this.queryBot.login(botAuthToken).then(this.noop, (error: Error) => {
-      this.onError('queryBot.login', error);
+      this.onError('initializeBot:queryBot.login', error);
     });
 
     this.queryBot.on('ready', () => {
@@ -153,7 +153,7 @@ export class App {
 
       if (guild.members.size > minimumGuildMembersForFarmCheck && botCount * 100 / guild.members.size >= maximumGuildBotsPercentage) {
         guild.leave().then(this.noop, (error: Error) => {
-          this.onError('guild.leave', error);
+          this.onError('leaveGuildWhenSuspectedAsBotFarm:guild.leave', error);
         });
         this.output(`Server "${guild.name}" has been marked as potential bot farm`);
         return true;
@@ -165,7 +165,7 @@ export class App {
 
   private setActivityMessage() {
     this.queryBot.user.setActivity(`${botPrefix}help | ${this.queryBot.guilds.size} servers`, { type: 'LISTENING' }).then(this.noop, (error: Error) => {
-      this.onError('queryBot.user.setActivity', error);
+      this.onError('setActivityMessage:queryBot.user.setActivity', error);
     });
   }
 
@@ -204,7 +204,9 @@ export class App {
           }
         ]
       }
-    }).then(this.noop, this.error);
+    }).then(this.noop, (error) => {
+      this.onError('displayHelp:message.channel.send', error);
+    });
   }
 
   private listSites(message: Message, parameters: string[]): void {
@@ -225,12 +227,12 @@ export class App {
               description: `${list}`
             }
           }).then(this.noop, (error: Error) => {
-            this.onError('message.channel.send', error);
+            this.onError('listSites:message.channel.send', error);
           });
 
         } else {
           message.channel.send(`No keywords available. Use command \`${botPrefix}help\` to see how to add one.`).then(this.noop, (error: Error) => {
-            this.onError('message.channel.send', error);
+            this.onError('listSites:message.channel.send', error);
           });
         }
       });
@@ -246,7 +248,7 @@ export class App {
       const site: string = parameters[1];
       this.sitesProvider.addSiteKeyword(message.guild.id, keyword, site).subscribe((site) => {
         message.channel.send(`Successfully set site **${site}** to keyword **${keyword}**.`).then(this.noop, (error: Error) => {
-          this.onError('message.channel.send', error);
+          this.onError('setKeyword:message.channel.send', error);
         });
       });
 
@@ -266,7 +268,7 @@ export class App {
       this.sitesProvider.search(message.guild.id, search, (<TextChannel> message.channel).nsfw, genericSearch ? undefined : keyword).subscribe((searchResultItems: GoogleSearchResultItem[]) => {
         if (searchResultItems.length === 1) {
           message.channel.send(searchResultItems[0].link).then(this.noop, (error: Error) => {
-            this.onError('message.channel.send', error);
+            this.onError('query:message.channel.send', error);
           });
 
         } else {
@@ -283,13 +285,13 @@ export class App {
               description: description
             }
           }).then(this.noop, (error: Error) => {
-            this.onError('message.channel.send', error);
+            this.onError('query:message.channel.send', error);
           });
 
         }
       }, (error: Error) => {
         message.channel.send(error || `My apologies. I had some trouble processing your request.`).then(this.noop, (error: Error) => {
-          this.onError('message.channel.send', error);
+          this.onError('query:message.channel.send', error);
         });
       });
 
@@ -300,7 +302,7 @@ export class App {
 
   private onWrongParameterCount(message: Message): void {
     message.channel.send(`Invalid parameter count`).then(this.noop, (error: Error) => {
-      this.onError('message.channel.send', error);
+      this.onError('onWrongParameterCount:message.channel.send', error);
     });
   }
 
