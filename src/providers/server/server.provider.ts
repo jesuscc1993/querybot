@@ -1,4 +1,4 @@
-import { Observable, Observer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Document, Model, Schema } from 'mongoose';
 
 import { Server } from '../../models/server';
@@ -27,7 +27,7 @@ export class ServerProvider {
     this.searchOptions = {
       cx: googleSearchCx,
       key: googleSearchApiKey
-    }
+    };
 
     this.defaultSiteKeywordsMap = {
       yt: 'youtube.com',
@@ -51,15 +51,15 @@ export class ServerProvider {
   };
 
   public addSiteKeyword(serverId: string, keyword: string, url: string): Observable<string> {
-    return new Observable((observer: Observer<string>) => {
-      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap: any) => {
+    return new Observable((observer) => {
+      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap) => {
         this.serverSiteKeywordsMap[serverId][keyword] = url;
 
         this.saveOrUpdateServer({
           _id: serverId,
           keywordsMap: this.serverSiteKeywordsMap[serverId]
 
-        }).subscribe((server: Server) => {
+        }).subscribe((server) => {
           observer.next(this.getServerSite(server, keyword));
           observer.complete();
         });
@@ -68,18 +68,18 @@ export class ServerProvider {
   }
 
   public getSiteKeyword(serverId: string, keyword: string): Observable<string> {
-    return new Observable((observer: Observer<string>) => {
+    return new Observable((observer) => {
 
       const onCompletion: Function = (keyword: string) => {
         observer.next(keyword);
         observer.complete();
-      }
+      };
 
       if (this.serverSiteKeywordsMap[serverId]) {
         onCompletion(this.serverSiteKeywordsMap[serverId][keyword]);
 
       } else {
-        this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap: any) => {
+        this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap) => {
           onCompletion(keywordsMap[keyword]);
         });
       }
@@ -87,8 +87,8 @@ export class ServerProvider {
   }
 
   public getServerSiteKeywords(serverId: string): Observable<SiteKeyword[]> {
-    return new Observable((observer: Observer<SiteKeyword[]>) => {
-      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap: any) => {
+    return new Observable((observer) => {
+      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap) => {
         this.serverSiteKeywordsMap[serverId] = keywordsMap;
 
         const siteKeywords: SiteKeyword[] = [];
@@ -103,18 +103,18 @@ export class ServerProvider {
   }
 
   public search(serverId: string, query: string, nsfw: boolean, keyword?: string): Observable<GoogleSearchResultItem[]> {
-    return new Observable((observer: Observer<GoogleSearchResultItem[]>) => {
+    return new Observable((observer) => {
       let searchOptions: GoogleSearchOptions = Object.assign({ num: 1, safe: nsfw ? 'off' : 'active' }, this.searchOptions);
 
       const onKeywordReady: Function = () => {
-        this.googleSearchProvider.search(query, searchOptions).subscribe((searchResults: GoogleSearchResultItem[]) => {
+        this.googleSearchProvider.search(query, searchOptions).subscribe((searchResults) => {
           observer.next(searchResults);
           observer.complete();
 
         }, (error: Error) => {
           observer.error(error);
         });
-      }
+      };
 
       if (keyword) {
         this.getSiteKeyword(serverId, keyword).subscribe((site) => {
@@ -136,7 +136,7 @@ export class ServerProvider {
   }
 
   private getServerSiteKeywordsMapOrSetDefaults(serverId: string): Observable<any> {
-    return new Observable((observer: Observer<any>) => {
+    return new Observable((observer) => {
 
       const onCompletion: Function = (server: Server) => {
         const keywordsMap: any = this.getServerKeywordsMap(server);
@@ -173,8 +173,8 @@ export class ServerProvider {
   }
 
   public findServer(serverId: string): Observable<Server | undefined> {
-    return new Observable((observer: Observer<Server | undefined>) => {
-      this.mongooseDao.findDocuments(this.serverDocument, { _id: serverId }).subscribe((servers: Server[]) => {
+    return new Observable((observer) => {
+      this.mongooseDao.findDocuments(this.serverDocument, { _id: serverId }).subscribe((servers) => {
         observer.next(servers.length ? servers[0] : undefined);
         observer.complete();
 
@@ -192,11 +192,11 @@ export class ServerProvider {
   }
 
   private getServerKeywordsMap(server: Server): any {
-    return server ? server.keywordsMap : undefined
+    return server ? server.keywordsMap : undefined;
   }
 
   private getServerSite(server: Server, keyword: string): any {
-    return (server && server.keywordsMap) ? server.keywordsMap[keyword] : undefined
+    return (server && server.keywordsMap) ? server.keywordsMap[keyword] : undefined;
   }
 
 }

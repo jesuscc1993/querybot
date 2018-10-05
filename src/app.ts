@@ -1,8 +1,6 @@
-import { Observable, Observer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Client, Guild, GuildMember, Message, MessageOptions, StringResolvable, TextChannel } from 'discord.js';
 import * as _ from 'lodash';
-
-import { SiteKeyword } from './models/site-keyword';
 
 import { ServerProvider } from './providers/server/server.provider';
 import { GoogleSearchResultItem } from './providers/google-search/google-search.models';
@@ -65,7 +63,7 @@ export class App {
   }
 
   private initializeDatabase(): Observable<undefined> {
-    return new Observable((observer: Observer<undefined>) => {
+    return new Observable((observer) => {
       this.sitesProvider.connect(databaseUrl, databaseName).subscribe(() => {
         this.output(`Database connection successfully established`);
 
@@ -81,9 +79,9 @@ export class App {
   private initializeBot() {
     this.queryBot = new Discord.Client();
 
-    this.queryBot.login(botAuthToken).then(this.noop, (error: Error) => {
-      this.onError(error, 'queryBot.login');
-    });
+    this.queryBot.login(botAuthToken).then(this.noop, (error: Error) => this.onError(error, `queryBot.login`));
+
+    this.queryBot.on('error', (error) => this.onError(error, `this.queryBot.on('error'`));
 
     this.queryBot.on('ready', () => {
       this.setActivityMessage();
@@ -215,7 +213,7 @@ export class App {
   private listSites(message: Message, parameters: string[]): void {
     if (parameters.length === 0) {
 
-      this.sitesProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords: SiteKeyword[]) => {
+      this.sitesProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords) => {
         if (siteKeywords.length) {
           let list: string = '';
           _.orderBy(siteKeywords, 'keyword').forEach((site) => {
@@ -267,7 +265,7 @@ export class App {
 
       const genericSearch: boolean = keyword === 'search' || keyword === 's';
 
-      this.sitesProvider.search(message.guild.id, search, (<TextChannel> message.channel).nsfw, genericSearch ? undefined : keyword).subscribe((searchResultItems: GoogleSearchResultItem[]) => {
+      this.sitesProvider.search(message.guild.id, search, (<TextChannel> message.channel).nsfw, genericSearch ? undefined : keyword).subscribe((searchResultItems) => {
         if (searchResultItems.length === 1) {
           this.sendMessage(message, searchResultItems[0].link);
 
