@@ -117,14 +117,10 @@ export class App {
 
         switch (command) {
           case 'help':
-            this.displayHelp(message);
-            break;
           case '?':
             this.displayHelp(message);
             break;
           case 'list':
-            this.listSites(message, parameters);
-            break;
           case 'ls':
             this.listSites(message, parameters);
             break;
