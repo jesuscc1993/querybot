@@ -26,7 +26,7 @@ export class GoogleSearchProvider {
 
         } else {
           const googleSearchResult: GoogleSearchResult = JSON.parse(response.toJSON().body);
-          observer.next(googleSearchResult.items);
+          observer.next(googleSearchResult.items || []);
           observer.complete();
         }
       });
