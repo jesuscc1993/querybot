@@ -113,24 +113,15 @@ export class App {
         const command: string = input.split(' ')[0];
         const parameters: string[] = this.getParametersFromInput(input);
 
-        const serverId: string = message.guild.id;
-
-        switch (command) {
-          case 'help':
-          case '?':
-            this.displayHelp(message);
-            break;
-          case 'list':
-          case 'ls':
-            this.listSites(message, parameters);
-            break;
-          case 'set':
-            this.setKeyword(message, parameters);
-            break;
-          default:
-            this.query(message, input);
-            break;
-        }
+        const commands: any = {
+          'help': () => this.displayHelp(message),
+          '?': () => this.displayHelp(message),
+          'list': () => this.listSites(message, parameters),
+          'ls': () => this.listSites(message, parameters),
+          'set': () => this.setKeyword(message, parameters),
+          'search': () => this.query(message, input),
+        };
+        (commands[command] || commands.search)();
       }
     });
   }
@@ -285,7 +276,7 @@ export class App {
         this.sendMessage(message, error || `My apologies. I had some trouble processing your request.`);
       });
 
-    } else {
+    } else if (parameters.length >= 1 && parameters[0].replace(/!/g, '') !== ''){
       this.onWrongParameterCount(message);
     }
   }
