@@ -79,34 +79,14 @@ export class App {
       botPrefix: botPrefix,
       botAuthToken: botAuthToken,
       botCommands: {
-        'help': (message: Message, input: string, parameters: string[]) => {
-          this.displayHelp(message, input, parameters)
-        },
-        '?': (message: Message, input: string, parameters: string[]) => {
-          this.displayHelp(message, input, parameters)
-        },
-
-        'list': (message: Message, input: string, parameters: string[]) => {
-          this.listSites(message, input, parameters)
-        },
-        'ls': (message: Message, input: string, parameters: string[]) => {
-          this.listSites(message, input, parameters)
-        },
-
-        'set': (message: Message, input: string, parameters: string[]) => {
-          this.setSiteKeyword(message, input, parameters)
-        },
-
-        'unset': (message: Message, input: string, parameters: string[]) => {
-          this.unsetSiteKeyword(message, input, parameters)
-        },
-
-        'search': (message: Message, input: string, parameters: string[]) => {
-          this.query(message, input, parameters)
-        },
-        'default': (message: Message, input: string, parameters: string[]) => {
-          this.query(message, input, parameters)
-        }
+        'help': this.displayHelp.bind(this),
+        '?': this.displayHelp.bind(this),
+        'list': this.listSites.bind(this),
+        'ls': this.listSites.bind(this),
+        'set': this.setSiteKeyword.bind(this),
+        'unset': this.unsetSiteKeyword.bind(this),
+        'search': this.query.bind(this),
+        'default': this.query.bind(this)
       },
       outputEnabled: outputEnabled,
       maximumGuildBotsPercentage: maximumGuildBotsPercentage,
