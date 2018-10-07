@@ -56,3 +56,7 @@ Returns the first search result matching a query on any site. Example: `!search 
 
 ## Invite link
 [Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
+
+## TODO
+* Custom prefix
+* Delete server DB entries after leaving
