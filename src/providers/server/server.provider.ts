@@ -42,6 +42,8 @@ export class ServerProvider {
         type: Date,
         default: Date.now
       }
+    }, {
+      minimize: false
     });
 
     this.serverDocument = mongoose.model('Server', this.serverSchema);

@@ -56,6 +56,3 @@ Returns the first search result matching a query on any site. Example: `!search 
 
 ## Invite link
 [Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
-
-## Known issues
-The last keyword can never be deleted as Mongoose removes a property from a model when it is empty and as it is empty by the update function it interprets that property needs no update so it remains as is.
