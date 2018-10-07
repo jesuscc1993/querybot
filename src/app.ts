@@ -23,7 +23,7 @@ const Discord = require('discord.js');
 
 export class App {
   private discordBot: DiscordBot;
-  private sitesProvider: ServerProvider;
+  private serverProvider: ServerProvider;
 
   public initialize(): void {
     this.setupHandlers();
@@ -58,10 +58,10 @@ export class App {
   }
 
   private initializeDatabase(): Observable<undefined> {
-    this.sitesProvider = new ServerProvider(googleSearchApiKey, googleSearchCx);
+    this.serverProvider = new ServerProvider(googleSearchApiKey, googleSearchCx);
 
     return new Observable((observer) => {
-      this.sitesProvider.connect(databaseUrl, databaseName).subscribe(() => {
+      this.serverProvider.connect(databaseUrl, databaseName).subscribe(() => {
         this.output(`Database connection successfully established`);
 
         observer.next(undefined);
@@ -94,7 +94,11 @@ export class App {
         },
 
         'set': (message: Message, input: string, parameters: string[]) => {
-          this.setKeyword(message, input, parameters)
+          this.setSiteKeyword(message, input, parameters)
+        },
+
+        'unset': (message: Message, input: string, parameters: string[]) => {
+          this.unsetSiteKeyword(message, input, parameters)
         },
 
         'search': (message: Message, input: string, parameters: string[]) => {
@@ -130,6 +134,10 @@ export class App {
             value: `Sets a site url to a keyword. Example: \`${botPrefix}set yt youtube.com\`.`
           },
           {
+            name: `\`${botPrefix}unset {keyword}\``,
+            value: `Unsets a site keyword. Example: \`${botPrefix}unset yt\`.`
+          },
+          {
             name: `\`${botPrefix}{keyword} {query}\``,
             value: `Returns the first search result matching a query on the site corresponding to a keyword. Example: \`${botPrefix}yt GMM\`.`
           },
@@ -145,7 +153,7 @@ export class App {
   private listSites(message: Message, input: string, parameters: string[]): void {
     if (parameters.length === 0) {
 
-      this.sitesProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords) => {
+      this.serverProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords) => {
         if (siteKeywords.length) {
           let list: string = '';
           _.orderBy(siteKeywords, 'keyword').forEach((site) => {
@@ -166,6 +174,7 @@ export class App {
         }
       }, (error) => {
         this.onError(error, `App.sitesProvider.getServerSiteKeywords`, message.guild.id);
+        this.discordBot.sendError(message, error);
       });
 
     } else {
@@ -173,15 +182,32 @@ export class App {
     }
   }
 
-  private setKeyword(message: Message, input: string, parameters: string[]): void {
+  private setSiteKeyword(message: Message, input: string, parameters: string[]): void {
     if (parameters.length === 2) {
       const keyword: string = parameters[0];
       const site: string = parameters[1];
-      this.sitesProvider.addSiteKeyword(message.guild.id, keyword, site).subscribe((site) => {
-        this.discordBot.sendMessage(message, `Successfully set site **${site}** to keyword **${keyword}**.`);
+      this.serverProvider.setSiteKeyword(message.guild.id, keyword, site).subscribe(() => {
+        this.discordBot.sendMessage(message, `Successfully set site "${site}" to keyword "${keyword}".`);
 
       }, (error) => {
-        this.onError(error, `App.sitesProvider.addSiteKeyword`, message.guild.id, keyword, site);
+        this.onError(error, `App.sitesProvider.setSiteKeyword`, message.guild.id, keyword, site);
+        this.discordBot.sendError(message, error);
+      });
+
+    } else {
+      this.discordBot.onWrongParameterCount(message);
+    }
+  }
+
+  private unsetSiteKeyword(message: Message, input: string, parameters: string[]): void {
+    if (parameters.length === 1) {
+      const keyword: string = parameters[0];
+      this.serverProvider.unsetSiteKeyword(message.guild.id, keyword).subscribe(() => {
+        this.discordBot.sendMessage(message, `Successfully unset keyword "${keyword}".`);
+
+      }, (error) => {
+        this.onError(error, `App.sitesProvider.unsetSiteKeyword`, message.guild.id, keyword);
+        this.discordBot.sendError(message, error);
       });
 
     } else {
@@ -192,12 +218,16 @@ export class App {
   private query(message: Message, input: string, parameters: string[]): void {
     const queryParameters: string[] = input.split(' ');
     if (queryParameters.length >= 2) {
-      const keyword: string = queryParameters.splice(0, 1)[0];
+      let keyword: string | undefined = queryParameters.splice(0, 1)[0];
       const search: string = queryParameters.join(' ');
+      const nsfw: boolean = (<TextChannel> message.channel).nsfw;
 
       const genericSearch: boolean = keyword === 'search' || keyword === 's';
+      if (genericSearch) {
+        keyword = undefined;
+      }
 
-      this.sitesProvider.search(message.guild.id, search, (<TextChannel> message.channel).nsfw, genericSearch ? undefined : keyword).subscribe((searchResultItems) => {
+      this.serverProvider.search(message.guild.id, search, nsfw, keyword).subscribe((searchResultItems) => {
         if (searchResultItems.length === 1) {
           this.discordBot.sendMessage(message, searchResultItems[0].link);
 
@@ -217,8 +247,9 @@ export class App {
           });
 
         }
-      }, (error: Error) => {
-        this.discordBot.sendMessage(message, error || `My apologies. I had some trouble processing your request.`);
+      }, (error) => {
+        this.onError(error, `App.serverProvider.search`, message.guild.id, search, nsfw, keyword);
+        this.discordBot.sendError(message, error);
       });
 
     } else if (queryParameters.length >= 1 && queryParameters[0].replace(/!/g, '') !== '') {

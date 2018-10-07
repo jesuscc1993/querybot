@@ -37,7 +37,11 @@ export class ServerProvider {
 
     this.serverSchema = new Schema({
       _id: String,
-      keywordsMap: Object
+      keywordsMap: Object,
+      updated: {
+        type: Date,
+        default: Date.now
+      }
     });
 
     this.serverDocument = mongoose.model('Server', this.serverSchema);
@@ -50,7 +54,7 @@ export class ServerProvider {
     return this.mongooseDao.connect(databaseUrl, databaseName);
   };
 
-  public addSiteKeyword(serverId: string, keyword: string, url: string): Observable<string> {
+  public setSiteKeyword(serverId: string, keyword: string, url: string): Observable<undefined> {
     return new Observable((observer) => {
       this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap) => {
         this.serverSiteKeywordsMap[serverId][keyword] = url;
@@ -60,9 +64,32 @@ export class ServerProvider {
           keywordsMap: this.serverSiteKeywordsMap[serverId]
 
         }).subscribe((server) => {
-          observer.next(this.getServerSite(server, keyword));
+          observer.next();
           observer.complete();
-        });
+
+        }, (error) => observer.error(error));
+      });
+    });
+  }
+
+  public unsetSiteKeyword(serverId: string, keyword: string): Observable<undefined> {
+    return new Observable((observer) => {
+      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap) => {
+        if (!this.serverSiteKeywordsMap[serverId][keyword]) {
+          observer.error(new Error(`Keyword "${keyword}" does not exist.`));
+        }
+
+        delete this.serverSiteKeywordsMap[serverId][keyword];
+
+        this.saveOrUpdateServer({
+          _id: serverId,
+          keywordsMap: this.serverSiteKeywordsMap[serverId]
+
+        }).subscribe((server) => {
+          observer.next();
+          observer.complete();
+
+        }, (error) => observer.error(error));
       });
     });
   }
@@ -81,7 +108,8 @@ export class ServerProvider {
       } else {
         this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe((keywordsMap) => {
           onCompletion(keywordsMap[keyword]);
-        });
+
+        }, (error) => observer.error(error));
       }
     });
   }
@@ -98,7 +126,8 @@ export class ServerProvider {
 
         observer.next(siteKeywords);
         observer.complete();
-      });
+
+      }, (error) => observer.error(error));
     });
   }
 
@@ -111,9 +140,7 @@ export class ServerProvider {
           observer.next(searchResults);
           observer.complete();
 
-        }, (error: Error) => {
-          observer.error(error);
-        });
+        }, (error) => observer.error(error));
       };
 
       if (keyword) {
@@ -126,7 +153,8 @@ export class ServerProvider {
           } else {
             observer.error(new Error('Invalid keyword.'));
           }
-        });
+
+        }, (error) => observer.error(error));
 
       } else {
         onKeywordReady();
@@ -154,9 +182,13 @@ export class ServerProvider {
             _id: serverId,
             keywordsMap: this.defaultSiteKeywordsMap
 
-          }).subscribe((savedServer) => onCompletion(savedServer));
+          }).subscribe((savedServer) => {
+            onCompletion(savedServer);
+
+          }, (error) => observer.error(error));
         }
-      });
+
+      }, (error) => observer.error(error));
     });
   }
 
@@ -178,9 +210,7 @@ export class ServerProvider {
         observer.next(servers.length ? servers[0] : undefined);
         observer.complete();
 
-      }, (error: Error) => {
-        observer.error(error);
-      });
+      }, (error) => observer.error(error));
     });
   }
 

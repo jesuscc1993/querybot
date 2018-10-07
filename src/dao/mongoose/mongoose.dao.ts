@@ -17,19 +17,18 @@ export class MongooseDao {
         observer.next(undefined);
         observer.complete();
 
-      }, (error: Error) => {
-        observer.error(error);
-      });
+      }, (error: Error) => observer.error(error));
     });
   };
 
   public updateDocument(source: Model<any>, documentFilters: any, document: Document): Observable<any> {
     return new Observable((observer) => {
-      source.updateOne(documentFilters, document, (error: Error) => {
-        if (error) {
+      source.updateOne(documentFilters, document, (error: Error, response: any) => {
+        if (error || response.nModified < 1) {
           observer.error(error);
 
         } else {
+          this.output(`Updated document\n${JSON.stringify(document)}`);
           observer.next(document);
           observer.complete();
         }
@@ -44,9 +43,7 @@ export class MongooseDao {
         observer.next(returnedDocument);
         observer.complete();
 
-      }, (error) => {
-        observer.error(error);
-      });
+      }, (error) => observer.error(error));
     });
   }
 
@@ -60,12 +57,18 @@ export class MongooseDao {
 
       this.findDocuments(source, documentFilters).subscribe((documents) => {
         if (documents && documents.length) {
-          this.updateDocument(source, documentFilters, document).subscribe((returnedDocument) => onCompletion(returnedDocument));
+          this.updateDocument(source, documentFilters, document).subscribe((returnedDocument) => {
+            onCompletion(returnedDocument)
+
+          }, (error) => observer.error(error));
 
         } else {
-          this.saveDocument(document).subscribe((returnedDocument) => onCompletion(returnedDocument));
+          this.saveDocument(document).subscribe((returnedDocument) => {
+            onCompletion(returnedDocument)
+
+          }, (error) => observer.error(error));
         }
-      });
+      }, (error) => observer.error(error));
     });
   }
 

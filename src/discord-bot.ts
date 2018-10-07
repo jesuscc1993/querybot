@@ -2,7 +2,7 @@ import { Client, Guild, GuildMember, Message, MessageOptions, StringResolvable }
 
 const Discord = require('discord.js');
 
-export class DiscordBotSettings {
+export interface DiscordBotSettings {
   botName: string;
   botPrefix: string;
   botAuthToken: string;
@@ -154,6 +154,11 @@ export class DiscordBot {
     } else {
       message.author.send(`I don't have the permission to send messages on the server "${message.guild.name}". Please, contact the server admin to have this permission added.`);
     }
+  }
+
+  public sendError(message: Message, error: Error): void {
+    const errorMessage: string = error ? error.message : '';
+    this.sendMessage(message, errorMessage || `My apologies. I had some trouble processing your request.`);
   }
 
   public encodeUrl(url: string): string {
