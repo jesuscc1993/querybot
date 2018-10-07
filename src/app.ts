@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Client, Guild, GuildMember, Message, MessageOptions, StringResolvable, TextChannel } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 import * as _ from 'lodash';
 
 import { ServerProvider } from './providers/server/server.provider';
@@ -14,30 +14,25 @@ import {
   googleSearchApiKey,
   googleSearchCx,
   maximumGuildBotsPercentage,
-  minimumGuildMembersForFarmCheck
+  minimumGuildMembersForFarmCheck,
+  outputEnabled
 } from './settings/settings';
+import { DiscordBot } from './discord-bot';
 
 const Discord = require('discord.js');
 
 export class App {
-
-  private queryBot: Client;
+  private discordBot: DiscordBot;
   private sitesProvider: ServerProvider;
 
-  private outputEnabled: boolean;
-
   public initialize(): void {
-    this.sitesProvider = new ServerProvider(googleSearchApiKey, googleSearchCx);
-
-    this.outputEnabled = true;
-
     this.setupHandlers();
 
     this.initializeDatabase().subscribe(() => {
       this.initializeBot();
 
     }, (error) => {
-      this.onError(error, `this.initializeDatabase`);
+      this.onError(error, `App.initializeDatabase`);
     });
   }
 
@@ -63,6 +58,8 @@ export class App {
   }
 
   private initializeDatabase(): Observable<undefined> {
+    this.sitesProvider = new ServerProvider(googleSearchApiKey, googleSearchCx);
+
     return new Observable((observer) => {
       this.sitesProvider.connect(databaseUrl, databaseName).subscribe(() => {
         this.output(`Database connection successfully established`);
@@ -77,96 +74,44 @@ export class App {
   }
 
   private initializeBot() {
-    this.queryBot = new Discord.Client();
+    this.discordBot = new DiscordBot({
+      botName: `QueryBot`,
+      botPrefix: botPrefix,
+      botAuthToken: botAuthToken,
+      botCommands: {
+        'help': (message: Message, input: string, parameters: string[]) => {
+          this.displayHelp(message, input, parameters)
+        },
+        '?': (message: Message, input: string, parameters: string[]) => {
+          this.displayHelp(message, input, parameters)
+        },
 
-    this.queryBot.login(botAuthToken).then(this.noop, (error: Error) => this.onError(error, `queryBot.login`));
+        'list': (message: Message, input: string, parameters: string[]) => {
+          this.listSites(message, input, parameters)
+        },
+        'ls': (message: Message, input: string, parameters: string[]) => {
+          this.listSites(message, input, parameters)
+        },
 
-    this.queryBot.on('error', (error) => this.onError(error, `this.queryBot.on('error'`));
+        'set': (message: Message, input: string, parameters: string[]) => {
+          this.setKeyword(message, input, parameters)
+        },
 
-    this.queryBot.on('ready', () => {
-      this.setActivityMessage();
-
-      let guildIdentifications: string[] = [];
-      this.queryBot.guilds.forEach((guild: Guild) => {
-        const leftGuild: boolean = this.leaveGuildWhenSuspectedAsBotFarm(guild);
-        if (!leftGuild) {
-          guildIdentifications.push(`(${guild.id}) "${guild.name}"`);
+        'search': (message: Message, input: string, parameters: string[]) => {
+          this.query(message, input, parameters)
+        },
+        'default': (message: Message, input: string, parameters: string[]) => {
+          this.query(message, input, parameters)
         }
-      });
-
-      if (guildIdentifications.length) {
-        this.output(`Currently running on the following ${guildIdentifications.length} server(s):\n${guildIdentifications.sort().join('\n')}`);
-      }
-    });
-
-    this.queryBot.on('guildCreate', (guild: Guild) => {
-      this.output(`Joined server "${guild.name}"`);
-      this.onGuildUpdate(guild);
-    });
-    this.queryBot.on('guildMemberAdd', (guild: Guild) => this.onGuildUpdate(guild));
-    this.queryBot.on('guildMemberRemove', (guild: Guild) => this.onGuildUpdate(guild));
-    this.queryBot.on('guildDelete', (guild: Guild) => this.output(`Left server "${guild.name}"`));
-
-    this.queryBot.on('message', (message: Message) => {
-      if (message.content.substring(0, botPrefix.length) === botPrefix) {
-        let input: string = message.content.substring(botPrefix.length);
-        const command: string = input.split(' ')[0];
-        const parameters: string[] = this.getParametersFromInput(input);
-
-        const commands: any = {
-          'help': () => this.displayHelp(message),
-          '?': () => this.displayHelp(message),
-          'list': () => this.listSites(message, parameters),
-          'ls': () => this.listSites(message, parameters),
-          'set': () => this.setKeyword(message, parameters),
-          'search': () => this.query(message, input),
-        };
-        (commands[command] || commands.search)();
-      }
+      },
+      outputEnabled: outputEnabled,
+      maximumGuildBotsPercentage: maximumGuildBotsPercentage,
+      minimumGuildMembersForFarmCheck: minimumGuildMembersForFarmCheck
     });
   }
 
-  private onGuildUpdate(guild: Guild): void {
-    this.leaveGuildWhenSuspectedAsBotFarm(guild);
-    this.setActivityMessage();
-  }
-
-  private leaveGuildWhenSuspectedAsBotFarm(guild: Guild): boolean {
-    if (guild.members) {
-      let botCount: number = 0;
-
-      guild.members.forEach((member: GuildMember) => {
-        if (member.user.bot) botCount++;
-      });
-
-      if (guild.members.size > minimumGuildMembersForFarmCheck && botCount * 100 / guild.members.size >= maximumGuildBotsPercentage) {
-        guild.leave().then(this.noop, (error: Error) => {
-          this.onError(error, 'guild.leave');
-        });
-        this.output(`Server "${guild.name}" has been marked as potential bot farm`);
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private setActivityMessage() {
-    const activityMessage: string = `${botPrefix}help | ${this.queryBot.guilds.size} servers`;
-    const activityOptions: any = { type: 'LISTENING' };
-    this.queryBot.user.setActivity(activityMessage, activityOptions).then(this.noop, (error: Error) => {
-      this.onError(error, 'queryBot.user.setActivity', activityMessage, JSON.stringify(activityOptions));
-    });
-  }
-
-  private getParametersFromInput(input: string): string[] {
-    const parameters: string[] = input.split(' ');
-    parameters.splice(0, 1);
-    return parameters;
-  }
-
-  private displayHelp(message: Message): void {
-    this.sendMessage(message, undefined, {
+  private displayHelp(message: Message, input: string, parameters: string[]): void {
+    this.discordBot.sendMessage(message, undefined, {
       embed: {
         color: botColor,
         title: 'QueryBot',
@@ -197,7 +142,7 @@ export class App {
     });
   }
 
-  private listSites(message: Message, parameters: string[]): void {
+  private listSites(message: Message, input: string, parameters: string[]): void {
     if (parameters.length === 0) {
 
       this.sitesProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords) => {
@@ -208,7 +153,7 @@ export class App {
           });
           list = list.substring(0, list.length - 1); // remove last line break
 
-          this.sendMessage(message, undefined, {
+          this.discordBot.sendMessage(message, undefined, {
             embed: {
               color: botColor,
               title: 'Available keywords',
@@ -217,53 +162,53 @@ export class App {
           });
 
         } else {
-          this.sendMessage(message, `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`);
+          this.discordBot.sendMessage(message, `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`);
         }
       }, (error) => {
-        this.onError(error, `this.sitesProvider.getServerSiteKeywords`, message.guild.id);
+        this.onError(error, `App.sitesProvider.getServerSiteKeywords`, message.guild.id);
       });
 
     } else {
-      this.onWrongParameterCount(message);
+      this.discordBot.onWrongParameterCount(message);
     }
   }
 
-  private setKeyword(message: Message, parameters: string[]): void {
+  private setKeyword(message: Message, input: string, parameters: string[]): void {
     if (parameters.length === 2) {
       const keyword: string = parameters[0];
       const site: string = parameters[1];
       this.sitesProvider.addSiteKeyword(message.guild.id, keyword, site).subscribe((site) => {
-        this.sendMessage(message, `Successfully set site **${site}** to keyword **${keyword}**.`);
+        this.discordBot.sendMessage(message, `Successfully set site **${site}** to keyword **${keyword}**.`);
 
       }, (error) => {
-        this.onError(error, `this.sitesProvider.addSiteKeyword`, message.guild.id, keyword, site);
+        this.onError(error, `App.sitesProvider.addSiteKeyword`, message.guild.id, keyword, site);
       });
 
     } else {
-      this.onWrongParameterCount(message);
+      this.discordBot.onWrongParameterCount(message);
     }
   }
 
-  private query(message: Message, input: string): void {
-    const parameters: string[] = input.split(' ');
-    if (parameters.length >= 2) {
-      const keyword: string = parameters.splice(0, 1)[0];
-      const search: string = parameters.join(' ');
+  private query(message: Message, input: string, parameters: string[]): void {
+    const queryParameters: string[] = input.split(' ');
+    if (queryParameters.length >= 2) {
+      const keyword: string = queryParameters.splice(0, 1)[0];
+      const search: string = queryParameters.join(' ');
 
       const genericSearch: boolean = keyword === 'search' || keyword === 's';
 
       this.sitesProvider.search(message.guild.id, search, (<TextChannel> message.channel).nsfw, genericSearch ? undefined : keyword).subscribe((searchResultItems) => {
         if (searchResultItems.length === 1) {
-          this.sendMessage(message, searchResultItems[0].link);
+          this.discordBot.sendMessage(message, searchResultItems[0].link);
 
         } else {
           let description: string = '';
           searchResultItems.forEach((searchResultItem: GoogleSearchResultItem) => {
-            description += `• [${searchResultItem.title}](${this.encodeUrl(searchResultItem.link)})\n`;
+            description += `• [${searchResultItem.title}](${this.discordBot.encodeUrl(searchResultItem.link)})\n`;
           });
           description = description.substring(0, description.length - 1); // remove last line break
 
-          this.sendMessage(message, undefined, {
+          this.discordBot.sendMessage(message, undefined, {
             embed: {
               color: botColor,
               title: `This is what I found:`,
@@ -273,20 +218,12 @@ export class App {
 
         }
       }, (error: Error) => {
-        this.sendMessage(message, error || `My apologies. I had some trouble processing your request.`);
+        this.discordBot.sendMessage(message, error || `My apologies. I had some trouble processing your request.`);
       });
 
-    } else if (parameters.length >= 1 && parameters[0].replace(/!/g, '') !== ''){
-      this.onWrongParameterCount(message);
+    } else if (queryParameters.length >= 1 && queryParameters[0].replace(/!/g, '') !== '') {
+      this.discordBot.onWrongParameterCount(message);
     }
-  }
-
-  private onWrongParameterCount(message: Message): void {
-    this.sendMessage(message, `Invalid parameter count`);
-  }
-
-  private encodeUrl(url: string): string {
-    return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
 
   private onError(error: Error, functionName: string, ...parameters: any): Function {
@@ -300,25 +237,11 @@ export class App {
   }
 
   private output(message: string): void {
-    console.log(`QueryBot: ${message}`);
+    console.log(`App: ${message}`);
   }
 
   private error(error: Error | any): void {
-    console.error(`QueryBot: ${error}`);
-  }
-
-  private noop(): void {
-
-  }
-
-  private sendMessage(message: Message, messageContent: StringResolvable, messageOptions?: MessageOptions): void {
-    if (message.guild.me.permissions.has('SEND_MESSAGES')) {
-      message.channel.send(messageContent, messageOptions).then(this.noop, (error) => {
-        this.onError(error, 'message.channel.send', messageContent, JSON.stringify(messageOptions));
-      });
-    } else {
-      message.author.send(`I don't have the permission to send messages on the server "${message.guild.name}". Please, contact the server admin to have this permission added.`);
-    }
+    console.error(`App: ${error}`);
   }
 
 }
