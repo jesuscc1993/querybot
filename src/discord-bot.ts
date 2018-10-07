@@ -3,8 +3,8 @@ import { Client, Guild, GuildMember, Message, MessageOptions, StringResolvable }
 const Discord = require('discord.js');
 
 export interface DiscordBotSettings {
-  botName: string;
   botPrefix: string;
+  botName: string;
   botAuthToken: string;
   botCommands: any;
   outputEnabled?: boolean;
@@ -13,8 +13,8 @@ export interface DiscordBotSettings {
 }
 
 export class DiscordBot {
-  readonly botName: string;
   readonly botPrefix: string;
+  readonly botName: string;
   readonly botAuthToken: string;
   readonly botCommands: any;
   readonly outputEnabled: boolean | undefined;
@@ -24,8 +24,8 @@ export class DiscordBot {
   private client: Client;
 
   constructor(discordBotSettings: DiscordBotSettings) {
-    this.botName = discordBotSettings.botName;
     this.botPrefix = discordBotSettings.botPrefix;
+    this.botName = discordBotSettings.botName;
     this.botAuthToken = discordBotSettings.botAuthToken;
     this.botCommands = discordBotSettings.botCommands;
     this.outputEnabled = discordBotSettings.outputEnabled;

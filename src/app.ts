@@ -8,6 +8,7 @@ import { GoogleSearchResultItem } from './providers/google-search/google-search.
 import {
   botAuthToken,
   botColor,
+  botName,
   botPrefix,
   databaseName,
   databaseUrl,
@@ -75,10 +76,11 @@ export class App {
 
   private initializeBot() {
     this.discordBot = new DiscordBot({
-      botName: `QueryBot`,
       botPrefix: botPrefix,
+      botName: botName,
       botAuthToken: botAuthToken,
       botCommands: {
+        'about': this.displayAbout.bind(this),
         'help': this.displayHelp.bind(this),
         '?': this.displayHelp.bind(this),
         'list': this.listSites.bind(this),
@@ -94,13 +96,34 @@ export class App {
     });
   }
 
+  private displayAbout(message: Message, input: string, parameters: string[]): void {
+    this.discordBot.sendMessage(message, undefined, {
+      embed: {
+        color: botColor,
+        title: `About ${botName}:`,
+        description:
+          `**Description:**
+          Searches the web for user provided queries. Keywords can be set and used to restrict results to certain sites.
+          
+          **Author:**
+          [jesuscc1993](https://github.com/jesuscc1993/)
+          
+          **Official site (please, upvote if you like the bot):**
+          [Official site](https://discordbots.org/bot/495279079868596225/)`
+      }
+    });
+  }
+
   private displayHelp(message: Message, input: string, parameters: string[]): void {
     this.discordBot.sendMessage(message, undefined, {
       embed: {
         color: botColor,
-        title: 'QueryBot',
-        description: 'Searches the web for user provided queries. Keywords can be set and used to restrict results to certain sites.',
+        title: 'Available commands:',
         fields: [
+          {
+            name: `\`${botPrefix}about\``,
+            value: `Displays information about the bot.`
+          },
           {
             name: `\`${botPrefix}help, ${botPrefix}?\``,
             value: `Displays the bot's help.`

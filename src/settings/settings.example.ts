@@ -1,4 +1,5 @@
 export const botPrefix: string = '!';
+export const botName: string = 'botName';
 export const botColor: number = 7506394;
 export const botAuthToken: string = 'authToken';
 
