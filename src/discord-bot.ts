@@ -66,12 +66,14 @@ export class DiscordBot {
     this.client.on('guildDelete', (guild: Guild) => this.output(`Left server "${guild.name}"`));
 
     this.client.on('message', (message: Message) => {
-      if (this.isBotCommand(message)) {
-        const input: string = message.content.substring(this.botPrefix.length);
-        const command: string = input.split(' ')[0];
-        const parameters: string[] = this.getParametersFromInput(input);
-        (this.botCommands[command] || this.botCommands.default)(message, input, parameters);
-      }
+      message.content.split('\n').forEach((line) => {
+        if (this.isBotCommand(line)) {
+          const input: string = line.substring(this.botPrefix.length);
+          const command: string = input.split(' ')[0];
+          const parameters: string[] = this.getParametersFromInput(input);
+          (this.botCommands[command] || this.botCommands.default)(message, input, parameters);
+        }
+      });
     });
   }
 
@@ -108,8 +110,8 @@ export class DiscordBot {
     });
   }
 
-  private isBotCommand(message: Message): boolean {
-    return message.content.substring(0, this.botPrefix.length) === this.botPrefix;
+  private isBotCommand(text: string): boolean {
+    return text.substring(0, this.botPrefix.length) === this.botPrefix;
   }
 
   private getParametersFromInput(input: string): string[] {
