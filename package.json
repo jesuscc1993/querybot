@@ -8,7 +8,7 @@
   },
   "main": "build/app.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p ./",
     "serve": "node build/app.js",
     "start": "tsc && npm run serve"
   },
