@@ -1,8 +1,8 @@
 import { Observable } from 'rxjs';
 import { Document, Model } from 'mongoose';
 
-import { Server } from '../../models/server';
-import { SiteKeyword } from '../../models/site-keyword';
+import { Server } from '../../models/server.model';
+import { SiteKeyword } from '../../models/site-keyword.model';
 
 import { MongooseDao } from '../../dao/mongoose/mongoose.dao';
 
