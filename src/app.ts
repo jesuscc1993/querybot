@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
-import { Message, TextChannel } from 'discord.js';
-import * as _ from 'lodash';
 
+import { DiscordBot } from './discord-bot';
 import { ServerProvider } from './providers/server/server.provider';
-import { GoogleSearchResultItem } from './providers/google-search/google-search.models';
+
+import { OutputUtil } from './utils/output.util';
+import { EventsUtil } from './utils/events.util';
 
 import {
   botAuthToken,
-  botColor,
   botName,
   botPrefix,
   databaseName,
@@ -18,7 +18,13 @@ import {
   minimumGuildMembersForFarmCheck,
   outputEnabled
 } from './settings/settings';
-import { DiscordBot } from './discord-bot';
+
+import { displayHelp } from './commands/help';
+import { displayAbout } from './commands/about';
+import { listSites } from './commands/list';
+import { setSiteKeyword } from './commands/set';
+import { unsetSiteKeyword } from './commands/unset';
+import { query } from './commands/query';
 
 const Discord = require('discord.js');
 
@@ -27,43 +33,24 @@ export class App {
   private serverProvider: ServerProvider;
 
   public initialize(): void {
-    this.setupHandlers();
+    OutputUtil.configure(outputEnabled);
+    EventsUtil.setupHandlers();
 
     this.initializeDatabase().subscribe(() => {
       this.initializeBot();
 
     }, (error) => {
-      this.onError(error, `App.initializeDatabase`);
-    });
-  }
-
-  private setupHandlers() {
-    const unhandledRejections: Map<Promise<any>, string> = new Map();
-    process.on('exit', (exitCode: number) => {
-      this.error(`Forced exit of code: ${exitCode}`);
-    });
-    process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
-      unhandledRejections.set(promise, reason);
-      this.error(`Unhandled rejection: ${promise} ${reason}`);
-    });
-    process.on('rejectionHandled', (promise: Promise<any>) => {
-      unhandledRejections.delete(promise);
-      this.error(`Rejection handled: ${promise}`);
-    });
-    process.on('uncaughtException', (error: Error) => {
-      this.error(`Caught exception: ${error}`);
-    });
-    process.on('warning', (warning: any) => {
-      this.error(`Process warning: ${warning.name}\nMessage: ${warning.message}\nStack trace:\n${warning.trace}`);
+      OutputUtil.outputError(error, `App.initializeDatabase`);
     });
   }
 
   private initializeDatabase(): Observable<undefined> {
-    this.serverProvider = new ServerProvider(googleSearchApiKey, googleSearchCx);
+    this.serverProvider = ServerProvider.getInstance();
+    this.serverProvider.configure(googleSearchApiKey, googleSearchCx);
 
     return new Observable((observer) => {
       this.serverProvider.connect(databaseUrl, databaseName).subscribe(() => {
-        this.output(`Database connection successfully established`);
+        OutputUtil.output(`Database connection successfully established`);
 
         observer.next(undefined);
         observer.complete();
@@ -80,202 +67,20 @@ export class App {
       botName: botName,
       botAuthToken: botAuthToken,
       botCommands: {
-        'about': this.displayAbout.bind(this),
-        'help': this.displayHelp.bind(this),
-        '?': this.displayHelp.bind(this),
-        'list': this.listSites.bind(this),
-        'ls': this.listSites.bind(this),
-        'set': this.setSiteKeyword.bind(this),
-        'unset': this.unsetSiteKeyword.bind(this),
-        'search': this.query.bind(this),
-        'default': this.query.bind(this)
+        'about': displayAbout.bind(this),
+        'help': displayHelp.bind(this),
+        '?': displayHelp.bind(this),
+        'list': listSites.bind(this),
+        'ls': listSites.bind(this),
+        'set': setSiteKeyword.bind(this),
+        'unset': unsetSiteKeyword.bind(this),
+        'search': query.bind(this),
+        'default': query.bind(this)
       },
       outputEnabled: outputEnabled,
       maximumGuildBotsPercentage: maximumGuildBotsPercentage,
       minimumGuildMembersForFarmCheck: minimumGuildMembersForFarmCheck
     });
-  }
-
-  private displayAbout(message: Message, input: string, parameters: string[]): void {
-    this.discordBot.sendMessage(message, undefined, {
-      embed: {
-        color: botColor,
-        title: `About ${botName}:`,
-        description:
-          `**Description:**
-          Searches the web for user provided queries. Keywords can be set and used to restrict results to certain sites.
-          
-          **Author:**
-          [jesuscc1993](https://github.com/jesuscc1993/)
-          
-          **Official site (please, upvote if you like the bot):**
-          [Official site](https://discordbots.org/bot/495279079868596225/)`
-      }
-    });
-  }
-
-  private displayHelp(message: Message, input: string, parameters: string[]): void {
-    this.discordBot.sendMessage(message, undefined, {
-      embed: {
-        color: botColor,
-        title: 'Available commands:',
-        fields: [
-          {
-            name: `\`${botPrefix}about\``,
-            value: `Displays information about the bot.`
-          },
-          {
-            name: `\`${botPrefix}help, ${botPrefix}?\``,
-            value: `Displays the bot's help.`
-          },
-          {
-            name: `\`${botPrefix}list, ${botPrefix}ls\``,
-            value: `Displays all available keywords.`
-          },
-          {
-            name: `\`${botPrefix}set {keyword} {siteUrl}\``,
-            value: `Sets a site url to a keyword. Example: \`${botPrefix}set yt youtube.com\`.`
-          },
-          {
-            name: `\`${botPrefix}unset {keyword}\``,
-            value: `Unsets a site keyword. Example: \`${botPrefix}unset yt\`.`
-          },
-          {
-            name: `\`${botPrefix}{keyword} {query}\``,
-            value: `Returns the first search result matching a query on the site corresponding to a keyword. Example: \`${botPrefix}yt GMM\`.`
-          },
-          {
-            name: `\`${botPrefix}search {query}\`, \`${botPrefix}s {query}\``,
-            value: `Returns the first search result matching a query on any site. Example: \`${botPrefix}search discord bots\`.`
-          }
-        ]
-      }
-    });
-  }
-
-  private listSites(message: Message, input: string, parameters: string[]): void {
-    if (parameters.length === 0) {
-
-      this.serverProvider.getServerSiteKeywords(message.guild.id).subscribe((siteKeywords) => {
-        if (siteKeywords.length) {
-          let list: string = '';
-          _.orderBy(siteKeywords, 'keyword').forEach((site) => {
-            list += `• **${site.keyword}** (${site.url})\n`;
-          });
-          list = list.substring(0, list.length - 1); // remove last line break
-
-          this.discordBot.sendMessage(message, undefined, {
-            embed: {
-              color: botColor,
-              title: 'Available keywords',
-              description: `${list}`
-            }
-          });
-
-        } else {
-          this.discordBot.sendMessage(message, `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`);
-        }
-      }, (error) => {
-        this.onError(error, `App.sitesProvider.getServerSiteKeywords`, message.guild.id);
-        this.discordBot.sendError(message, error);
-      });
-
-    } else {
-      this.discordBot.onWrongParameterCount(message);
-    }
-  }
-
-  private setSiteKeyword(message: Message, input: string, parameters: string[]): void {
-    if (parameters.length === 2) {
-      const keyword: string = parameters[0];
-      const site: string = parameters[1];
-      this.serverProvider.setSiteKeyword(message.guild.id, keyword, site).subscribe(() => {
-        this.discordBot.sendMessage(message, `Successfully set site "${site}" to keyword "${keyword}".`);
-
-      }, (error) => {
-        this.onError(error, `App.sitesProvider.setSiteKeyword`, message.guild.id, keyword, site);
-        this.discordBot.sendError(message, error);
-      });
-
-    } else {
-      this.discordBot.onWrongParameterCount(message);
-    }
-  }
-
-  private unsetSiteKeyword(message: Message, input: string, parameters: string[]): void {
-    if (parameters.length === 1) {
-      const keyword: string = parameters[0];
-      this.serverProvider.unsetSiteKeyword(message.guild.id, keyword).subscribe(() => {
-        this.discordBot.sendMessage(message, `Successfully unset keyword "${keyword}".`);
-
-      }, (error) => {
-        this.onError(error, `App.sitesProvider.unsetSiteKeyword`, message.guild.id, keyword);
-        this.discordBot.sendError(message, error);
-      });
-
-    } else {
-      this.discordBot.onWrongParameterCount(message);
-    }
-  }
-
-  private query(message: Message, input: string, parameters: string[]): void {
-    const queryParameters: string[] = input.split(' ');
-    if (queryParameters.length >= 2) {
-      let keyword: string | undefined = queryParameters.splice(0, 1)[0];
-      const search: string = queryParameters.join(' ');
-      const nsfw: boolean = (<TextChannel> message.channel).nsfw;
-
-      const genericSearch: boolean = keyword === 'search' || keyword === 's';
-      if (genericSearch) {
-        keyword = undefined;
-      }
-
-      this.serverProvider.search(message.guild.id, search, nsfw, keyword).subscribe((searchResultItems) => {
-        if (searchResultItems.length === 1) {
-          this.discordBot.sendMessage(message, searchResultItems[0].link);
-
-        } else {
-          let description: string = '';
-          searchResultItems.forEach((searchResultItem: GoogleSearchResultItem) => {
-            description += `• [${searchResultItem.title}](${this.discordBot.encodeUrl(searchResultItem.link)})\n`;
-          });
-          description = description.substring(0, description.length - 1); // remove last line break
-
-          this.discordBot.sendMessage(message, undefined, {
-            embed: {
-              color: botColor,
-              title: `This is what I found:`,
-              description: description
-            }
-          });
-
-        }
-      }, (error) => {
-        this.onError(error, `App.serverProvider.search`, message.guild.id, search, nsfw, keyword);
-        this.discordBot.sendError(message, error);
-      });
-
-    } else if (queryParameters.length >= 1 && queryParameters[0].replace(/!/g, '') !== '') {
-      this.discordBot.onWrongParameterCount(message);
-    }
-  }
-
-  private onError(error: Error, functionName: string, ...parameters: any): Function {
-    let errorMessage: string = `${error} thrown`;
-    if (functionName) errorMessage += ` when calling ${functionName}`;
-    if (parameters) errorMessage += ` with parameters ${parameters}`;
-
-    return (error: Error) => {
-      this.error(errorMessage);
-    };
-  }
-
-  private output(message: string): void {
-    console.log(`App: ${message}`);
-  }
-
-  private error(error: Error | any): void {
-    console.error(`App: ${error}`);
   }
 
 }

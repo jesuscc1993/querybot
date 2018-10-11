@@ -71,7 +71,7 @@ export class DiscordBot {
           const input: string = line.substring(this.botPrefix.length);
           const command: string = input.split(' ')[0];
           const parameters: string[] = this.getParametersFromInput(input);
-          (this.botCommands[command] || this.botCommands.default)(message, input, parameters);
+          (this.botCommands[command] || this.botCommands.default)(this, message, input, parameters);
         }
       });
     });

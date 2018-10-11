@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Document, Model, Schema } from 'mongoose';
+import { Document, Model } from 'mongoose';
 
 import { Server } from '../../models/server';
 import { SiteKeyword } from '../../models/site-keyword';
@@ -9,47 +9,46 @@ import { MongooseDao } from '../../dao/mongoose/mongoose.dao';
 import { GoogleSearchProvider } from '../google-search/google-search.provider';
 import { GoogleSearchOptions, GoogleSearchResultItem } from '../google-search/google-search.models';
 
+import { serverSchema } from './server.schema';
+import { defaultSiteKeywordsMap } from '../../settings/settings';
+
 const mongoose = require('mongoose');
 
 export class ServerProvider {
 
-  readonly serverSchema: Schema;
   readonly serverDocument: Model<any>;
   readonly mongooseDao: MongooseDao;
 
-  readonly googleSearchProvider: GoogleSearchProvider = new GoogleSearchProvider();
-  readonly searchOptions: GoogleSearchOptions;
+  readonly googleSearchProvider: GoogleSearchProvider;
 
-  readonly defaultSiteKeywordsMap: any;
   readonly serverSiteKeywordsMap: any;
 
-  constructor(googleSearchApiKey: string, googleSearchCx: string) {
+  protected static _instance: any = new ServerProvider();
+  private searchOptions: GoogleSearchOptions;
+
+  constructor() {
+    if (ServerProvider._instance) {
+      throw new Error('Error: Instantiation failed: Use SingletonClass.getInstance() instead of new.');
+    }
+    ServerProvider._instance = this;
+
+    this.serverDocument = mongoose.model('Server', serverSchema);
+    this.mongooseDao = new MongooseDao();
+
+    this.googleSearchProvider = new GoogleSearchProvider();
+
+    this.serverSiteKeywordsMap = {};
+  }
+
+  public static getInstance(): ServerProvider {
+    return ServerProvider._instance;
+  }
+
+  public configure(googleSearchApiKey: string, googleSearchCx: string): void {
     this.searchOptions = {
       cx: googleSearchCx,
       key: googleSearchApiKey
     };
-
-    this.defaultSiteKeywordsMap = {
-      yt: 'youtube.com',
-      tw: 'twitch.tv'
-    };
-    this.serverSiteKeywordsMap = {};
-
-    this.serverSchema = new Schema({
-      _id: String,
-      keywordsMap: Object,
-      updated: {
-        type: Date,
-        default: Date.now
-      }
-    }, {
-      minimize: false
-    });
-
-    this.serverDocument = mongoose.model('Server', this.serverSchema);
-
-    this.mongooseDao = new MongooseDao();
-    this.googleSearchProvider = new GoogleSearchProvider();
   }
 
   public connect(databaseUrl: string, databaseName: string): Observable<undefined> {
@@ -182,7 +181,7 @@ export class ServerProvider {
         } else {
           this.saveServer({
             _id: serverId,
-            keywordsMap: this.defaultSiteKeywordsMap
+            keywordsMap: defaultSiteKeywordsMap
 
           }).subscribe((savedServer) => {
             onCompletion(savedServer);

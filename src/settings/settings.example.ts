@@ -13,3 +13,8 @@ export const googleSearchCx: string = 'googleSearchCx';
 
 export const minimumGuildMembersForFarmCheck: number = 25;
 export const maximumGuildBotsPercentage: number = 75;
+
+export const defaultSiteKeywordsMap = {
+  yt: 'youtube.com',
+  tw: 'twitch.tv'
+};
