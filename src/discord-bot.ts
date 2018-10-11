@@ -4,7 +4,6 @@ const Discord = require('discord.js');
 
 export interface DiscordBotSettings {
   botPrefix: string;
-  botName: string;
   botAuthToken: string;
   botCommands: any;
   outputEnabled?: boolean;
@@ -14,18 +13,17 @@ export interface DiscordBotSettings {
 
 export class DiscordBot {
   readonly botPrefix: string;
-  readonly botName: string;
   readonly botAuthToken: string;
   readonly botCommands: any;
   readonly outputEnabled: boolean | undefined;
   readonly maximumGuildBotsPercentage: number | undefined;
   readonly minimumGuildMembersForFarmCheck: number | undefined;
 
+  private className: string;
   private client: Client;
 
   constructor(discordBotSettings: DiscordBotSettings) {
     this.botPrefix = discordBotSettings.botPrefix;
-    this.botName = discordBotSettings.botName;
     this.botAuthToken = discordBotSettings.botAuthToken;
     this.botCommands = discordBotSettings.botCommands;
     this.outputEnabled = discordBotSettings.outputEnabled;
@@ -35,6 +33,8 @@ export class DiscordBot {
   }
 
   private initializeBot() {
+    this.className = `DiscordBot`;
+
     this.client = new Discord.Client();
 
     this.client.login(this.botAuthToken).then(this.noop, (error: Error) => this.onError(error, `client.login`));
@@ -131,11 +131,13 @@ export class DiscordBot {
   }
 
   private output(message: string): void {
-    console.log(`${this.botName}: ${message}`);
+    if (this.outputEnabled) {
+      console.log(`${this.className}: ${message}`);
+    }
   }
 
   private error(error: Error | any): void {
-    console.error(`${this.botName}: ${error}`);
+    console.error(`${this.className}: ${error}`);
   }
 
   private noop(): void {

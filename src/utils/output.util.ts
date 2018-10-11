@@ -16,14 +16,14 @@ export class OutputUtil {
     };
   }
 
-  public static output(message: string): void {
+  public static log(message: string): void {
     if (this.outputEnabled) {
-      console.log(`App: ${message}`);
+      console.log(message);
     }
   }
 
   public static error(error: Error | any): void {
-    console.error(`App: ${error}`);
+    console.error(error);
   }
 
 }
