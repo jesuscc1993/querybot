@@ -18,10 +18,13 @@ export const query = (discordBot: DiscordBot, message: Message, input: string, p
     }
 
     ServerProvider.getInstance().search(message.guild.id, search, nsfw, keyword).subscribe((searchResultItems) => {
-      if (searchResultItems.length === 1) {
+      if (!searchResultItems.length) {
+        discordBot.sendMessage(message, `No results found.`);
+
+      } else if (searchResultItems.length === 1) {
         discordBot.sendMessage(message, searchResultItems[0].link);
 
-      } else {
+      } else if (searchResultItems.length > 1) {
         let description: string = '';
         searchResultItems.forEach((searchResultItem: GoogleSearchResultItem) => {
           description += `• [${searchResultItem.title}](${discordBot.encodeUrl(searchResultItem.link)})\n`;
