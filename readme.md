@@ -2,12 +2,12 @@
 
 ## Description
 
-Bot that brings search functionalities to [Discord](https://discordapp.com/) thanks to the Google Search API.  
+Bot that brings search functionalities to [Discord](https://discordapp.com/) thanks to the Google Search API.
 
 ## Key Features
 
-* Keywords can be created and used to only search for results on certain websites.  
-* Uses safe search on SFW channels and full search on NSFW channels.  
+* Keywords can be created and used to only search for results on certain websites.
+* Uses safe search on SFW channels and full search on NSFW channels.
 * Automatically leaves servers with > 25 members where over 75% of the member total is comprised of bots (configurable).
 
 ## Technologies
@@ -39,24 +39,25 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 ## Commands
 
-`!help, !?`  
+`!help, !?`
 Displays the bot's help.
 
-`!list, !ls`  
+`!list, !ls`
 Displays all available keywords.
 
-`!set {keyword} {siteUrl}`  
+`!set {keyword} {siteUrl}`
 Sets a site url to a keyword. Example: `!set yt youtube.com`.
 
-`!{keyword} {query}`  
+`!{keyword} {query}`
 Returns the first search result matching a query on the site corresponding to a keyword. Example: `!yt GMM`.
 
-`!search {query}, !s {query}`  
+`!search {query}, !s {query}`
 Returns the first search result matching a query on any site. Example: `!search discord bots`.
 
 ## Invite link
 [Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
 
 ## TODO
-* Custom prefix
+* Enable to configure custom prefix by server
+* React to mentions
 * Delete server DB entries after leaving
