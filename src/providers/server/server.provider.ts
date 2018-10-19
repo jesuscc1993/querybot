@@ -174,7 +174,7 @@ export class ServerProvider {
         observer.complete();
       };
 
-      this.findServer(serverId).subscribe((returnedServer) => {
+      this.findServerById(serverId).subscribe((returnedServer) => {
         if (returnedServer) {
           onCompletion(returnedServer);
 
@@ -205,7 +205,12 @@ export class ServerProvider {
     return this.mongooseDao.saveOrUpdateDocument(this.serverDocument, { _id: server._id }, this.serverToDocument(server));
   }
 
-  public findServer(serverId: string): Observable<Server | undefined> {
+  public deleteServerById(serverId: string): Observable<any> {
+    const server: Server = { _id: serverId };
+    return this.mongooseDao.deleteDocument(this.serverDocument, { _id: serverId }, this.serverToDocument(server));
+  }
+
+  public findServerById(serverId: string): Observable<Server | undefined> {
     return new Observable((observer) => {
       this.mongooseDao.findDocuments(this.serverDocument, { _id: serverId }).subscribe((servers) => {
         observer.next(servers.length ? servers[0] : undefined);

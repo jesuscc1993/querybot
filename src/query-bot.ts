@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Message } from "discord.js";
+import { Guild, Message } from 'discord.js';
 
 import { DiscordBot } from './discord-bot';
 import { ServerProvider } from './providers/server/server.provider';
@@ -43,9 +43,7 @@ export class QueryBot {
       OutputUtil.log(`${this.className}: Database connection successfully established`);
       this.initializeBot();
 
-    }, (error) => {
-      OutputUtil.outputError(error, `${this.className}.initializeDatabase`);
-    });
+    }, (error) => this.onError(error, `initializeDatabase`));
   }
 
   private initializeDatabase(): Observable<undefined> {
@@ -68,6 +66,7 @@ export class QueryBot {
         'default': query.bind(this)
       },
       onMention: this.onMention.bind(this),
+      onGuildLeft: this.onGuildLeft.bind(this),
       outputEnabled: outputEnabled,
       maximumGuildBotsPercentage: maximumGuildBotsPercentage,
       minimumGuildMembersForFarmCheck: minimumGuildMembersForFarmCheck
@@ -76,6 +75,17 @@ export class QueryBot {
 
   private onMention(discordBot: DiscordBot, message: Message): void {
     discordBot.sendMessage(message, `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix}help\`.`);
+  }
+
+  private onGuildLeft(discordBot: DiscordBot, guild: Guild): void {
+    this.serverProvider.deleteServerById(guild.id).subscribe(() => {
+      OutputUtil.log(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
+
+    }, (error) => this.onError(error, `onGuildLeft`));
+  }
+
+  private onError(error: Error, functionName: string): void {
+    OutputUtil.outputError(error, `${this.className}.${functionName}`);
   }
 
 }

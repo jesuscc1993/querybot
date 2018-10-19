@@ -6,6 +6,8 @@ export interface DiscordBotSettings {
   botPrefix: string;
   botAuthToken: string;
   botCommands: any;
+  onGuildJoined?: Function;
+  onGuildLeft?: Function;
   onMention?: Function;
   outputEnabled?: boolean;
   maximumGuildBotsPercentage?: number;
@@ -16,6 +18,8 @@ export class DiscordBot {
   readonly botPrefix: string;
   readonly botAuthToken: string;
   readonly botCommands: any;
+  readonly onGuildJoined?: Function | undefined;
+  readonly onGuildLeft?: Function | undefined;
   readonly onMention?: Function | undefined;
   readonly outputEnabled: boolean | undefined;
   readonly maximumGuildBotsPercentage: number | undefined;
@@ -28,6 +32,8 @@ export class DiscordBot {
     this.botPrefix = discordBotSettings.botPrefix;
     this.botAuthToken = discordBotSettings.botAuthToken;
     this.botCommands = discordBotSettings.botCommands;
+    this.onGuildJoined = discordBotSettings.onGuildJoined;
+    this.onGuildLeft = discordBotSettings.onGuildLeft;
     this.onMention = discordBotSettings.onMention;
     this.outputEnabled = discordBotSettings.outputEnabled;
     this.maximumGuildBotsPercentage = discordBotSettings.maximumGuildBotsPercentage;
@@ -51,7 +57,7 @@ export class DiscordBot {
       this.client.guilds.forEach((guild: Guild) => {
         const leftGuild: boolean = this.leaveGuildWhenSuspectedAsBotFarm(guild);
         if (!leftGuild) {
-          guildIdentifications.push(`(${guild.id}) "${guild.name}"`);
+          guildIdentifications.push(`${guild.id} ("${guild.name}")`);
         }
       });
 
@@ -61,12 +67,16 @@ export class DiscordBot {
     });
 
     this.client.on('guildCreate', (guild: Guild) => {
-      this.output(`Joined server "${guild.name}"`);
+      this.output(`Joined guild "${guild.name}"`);
       this.onGuildUpdate(guild);
+      this.call(this.onGuildJoined, this, guild);
     });
     this.client.on('guildMemberAdd', (guild: Guild) => this.onGuildUpdate(guild));
     this.client.on('guildMemberRemove', (guild: Guild) => this.onGuildUpdate(guild));
-    this.client.on('guildDelete', (guild: Guild) => this.output(`Left server "${guild.name}"`));
+    this.client.on('guildDelete', (guild: Guild) => {
+      this.output(`Left guild "${guild.name}"`);
+      this.call(this.onGuildLeft, this, guild);
+    });
 
     this.client.on('message', (message: Message) => {
       const commandFound: boolean = message.content.indexOf(this.botPrefix) === 0 || message.content.indexOf(`\n${this.botPrefix}`) > 0;
@@ -81,8 +91,8 @@ export class DiscordBot {
           }
         });
 
-      } else if (message.isMentioned(this.client.user) && this.onMention) {
-        this.onMention(this, message);
+      } else if (message.isMentioned(this.client.user)) {
+        this.call(this.onMention, this, message);
       }
 
     });
@@ -151,8 +161,13 @@ export class DiscordBot {
     console.error(`${this.className}: ${error}`);
   }
 
-  private noop(): void {
+  private noop(...params: any): void {
 
+  }
+
+  private call(method: Function | undefined, ...params: any): void {
+    const finalMethod = typeof method === 'function' ? method : this.noop;
+    finalMethod(...params);
   }
 
   /* public */

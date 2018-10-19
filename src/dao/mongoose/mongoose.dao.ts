@@ -87,6 +87,21 @@ export class MongooseDao {
     });
   }
 
+  public deleteDocument(source: Model<any>, documentFilters: any, document: Document): Observable<any> {
+    return new Observable((observer) => {
+      source.deleteOne(documentFilters, (error: Error) => {
+        if (error) {
+          observer.error(error);
+
+        } else {
+          this.output(`Deleted document\n${JSON.stringify(document)}`);
+          observer.next(document);
+          observer.complete();
+        }
+      });
+    });
+  }
+
   private output(message: any) {
     if (this.loggingEnabled) {
       console.log(message);
