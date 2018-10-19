@@ -59,5 +59,4 @@ Returns the first search result matching a query on any site. Example: `!search 
 
 ## TODO
 * Enable to configure custom prefix by server
-* React to mentions
 * Delete server DB entries after leaving
