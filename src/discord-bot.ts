@@ -6,6 +6,7 @@ export interface DiscordBotSettings {
   botPrefix: string;
   botAuthToken: string;
   botCommands: any;
+  onMention?: Function;
   outputEnabled?: boolean;
   maximumGuildBotsPercentage?: number;
   minimumGuildMembersForFarmCheck?: number;
@@ -15,6 +16,7 @@ export class DiscordBot {
   readonly botPrefix: string;
   readonly botAuthToken: string;
   readonly botCommands: any;
+  readonly onMention?: Function | undefined;
   readonly outputEnabled: boolean | undefined;
   readonly maximumGuildBotsPercentage: number | undefined;
   readonly minimumGuildMembersForFarmCheck: number | undefined;
@@ -26,6 +28,7 @@ export class DiscordBot {
     this.botPrefix = discordBotSettings.botPrefix;
     this.botAuthToken = discordBotSettings.botAuthToken;
     this.botCommands = discordBotSettings.botCommands;
+    this.onMention = discordBotSettings.onMention;
     this.outputEnabled = discordBotSettings.outputEnabled;
     this.maximumGuildBotsPercentage = discordBotSettings.maximumGuildBotsPercentage;
     this.minimumGuildMembersForFarmCheck = discordBotSettings.minimumGuildMembersForFarmCheck;
@@ -66,14 +69,22 @@ export class DiscordBot {
     this.client.on('guildDelete', (guild: Guild) => this.output(`Left server "${guild.name}"`));
 
     this.client.on('message', (message: Message) => {
-      message.content.split('\n').forEach((line) => {
-        if (this.isBotCommand(line)) {
-          const input: string = line.substring(this.botPrefix.length);
-          const command: string = input.split(' ')[0];
-          const parameters: string[] = this.getParametersFromInput(input);
-          (this.botCommands[command] || this.botCommands.default)(this, message, input, parameters);
-        }
-      });
+      const commandFound: boolean = message.content.indexOf(this.botPrefix) === 0 || message.content.indexOf(`\n${this.botPrefix}`) > 0;
+
+      if (commandFound) {
+        message.content.split('\n').forEach((line) => {
+          if (this.isBotCommand(line)) {
+            const input: string = line.substring(this.botPrefix.length);
+            const command: string = input.split(' ')[0];
+            const parameters: string[] = this.getParametersFromInput(input);
+            (this.botCommands[command] || this.botCommands.default)(this, message, input, parameters);
+          }
+        });
+
+      } else if (message.isMentioned(this.client.user) && this.onMention) {
+        this.onMention(this, message);
+      }
+
     });
   }
 

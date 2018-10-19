@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { Message } from "discord.js";
 
 import { DiscordBot } from './discord-bot';
 import { ServerProvider } from './providers/server/server.provider';
@@ -66,10 +67,15 @@ export class QueryBot {
         'search': query.bind(this),
         'default': query.bind(this)
       },
+      onMention: this.onMention.bind(this),
       outputEnabled: outputEnabled,
       maximumGuildBotsPercentage: maximumGuildBotsPercentage,
       minimumGuildMembersForFarmCheck: minimumGuildMembersForFarmCheck
     });
+  }
+
+  private onMention(discordBot: DiscordBot, message: Message): void {
+    discordBot.sendMessage(message, `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix}help\`.`);
   }
 
 }
