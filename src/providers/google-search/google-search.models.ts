@@ -22,7 +22,15 @@ export interface GoogleSearchResultItem {
   kind: string;
   link: string;
   pagemap: {
-    metatags: {}[]
+    cse_image?: {
+      src: string;
+    }[]
+    cse_thumbnail?: {
+      width: string;
+      height: string;
+      src: string;
+    }[]
+    metatags?: {}[]
   }
   snippet: string;
   title: string;

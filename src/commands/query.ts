@@ -3,7 +3,6 @@ import { DiscordBot } from '../discord-bot';
 import { ServerProvider } from '../providers/server/server.provider';
 import { OutputUtil } from '../utils/output.util';
 import { GoogleSearchResultItem } from '../providers/google-search/google-search.models';
-import { botColor } from '../settings/settings';
 
 export const query = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   const queryParameters: string[] = input.split(' ');
@@ -21,24 +20,13 @@ export const query = (discordBot: DiscordBot, message: Message, input: string, p
       if (!searchResultItems.length) {
         discordBot.sendMessage(message, `No results found.`);
 
-      } else if (searchResultItems.length === 1) {
-        discordBot.sendMessage(message, searchResultItems[0].link);
+      } else {
+        discordBot.sendMessage(message, `This is what I found:`);
 
-      } else if (searchResultItems.length > 1) {
-        let description: string = '';
         searchResultItems.forEach((searchResultItem: GoogleSearchResultItem) => {
-          description += `• [${searchResultItem.title}](${discordBot.encodeUrl(searchResultItem.link)})\n`;
+          discordBot.sendMessage(message, searchResultItem.link);
+          // discordBot.sendMessage(message, undefined, getEmbedFromGoogleSearchResultItem(discordBot, searchResultItem));
         });
-        description = description.substring(0, description.length - 1); // remove last line break
-
-        discordBot.sendMessage(message, undefined, {
-          embed: {
-            color: botColor,
-            title: `This is what I found:`,
-            description: description
-          }
-        });
-
       }
     }, (error) => {
       OutputUtil.outputError(error, `App.serverProvider.search`, message.guild.id, search, nsfw, keyword);
@@ -49,3 +37,23 @@ export const query = (discordBot: DiscordBot, message: Message, input: string, p
     discordBot.onWrongParameterCount(message);
   }
 };
+
+/*const getEmbedFromGoogleSearchResultItem: Function = (discordBot: DiscordBot, searchResultItem: GoogleSearchResultItem): MessageOptions => {
+  let description: string = '';
+  description += `[${searchResultItem.title}](${discordBot.encodeUrl(searchResultItem.link)})\n`;
+  description += `${searchResultItem.snippet}\n`;
+
+  let image: any = {};
+  if (searchResultItem.pagemap.cse_image && searchResultItem.pagemap.cse_image.length) {
+    image.url = searchResultItem.pagemap.cse_image[0].src;
+  }
+
+  return {
+    embed: {
+      color: botColor,
+      description: description,
+      image: image
+    }
+  };
+
+};*/
