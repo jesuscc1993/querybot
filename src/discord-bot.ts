@@ -132,7 +132,7 @@ export class DiscordBot {
   }
 
   private isBotCommand(text: string): boolean {
-    return text.substring(0, this.botPrefix.length) === this.botPrefix;
+    return text.substring(0, this.botPrefix.length) === this.botPrefix && text.substring(this.botPrefix.length).charAt(0) !== ' ';
   }
 
   private getParametersFromInput(input: string): string[] {
