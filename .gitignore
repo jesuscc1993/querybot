@@ -1,6 +1,7 @@
 .idea
 npm-debug.log
-/logs
-/build
-/node_modules
-/src/settings/settings.ts
+logs/*
+!logs/.gitkeep
+build
+node_modules
+src/settings/settings.ts
