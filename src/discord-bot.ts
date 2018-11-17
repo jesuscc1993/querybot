@@ -1,6 +1,11 @@
 import { Client, Guild, GuildMember, Message, MessageOptions, StringResolvable } from 'discord.js';
+import Discord from 'discord.js';
 
-const Discord = require('discord.js');
+export interface DiscordBotLogger {
+  info: (message: string) => void
+  warn: (message: string) => void
+  error: (error: any) => void
+}
 
 export interface DiscordBotSettings {
   botPrefix: string;
@@ -9,7 +14,7 @@ export interface DiscordBotSettings {
   onGuildJoined?: Function;
   onGuildLeft?: Function;
   onMention?: Function;
-  outputEnabled?: boolean;
+  logger: DiscordBotLogger;
   maximumGuildBotsPercentage?: number;
   minimumGuildMembersForFarmCheck?: number;
 }
@@ -21,11 +26,10 @@ export class DiscordBot {
   readonly onGuildJoined?: Function | undefined;
   readonly onGuildLeft?: Function | undefined;
   readonly onMention?: Function | undefined;
-  readonly outputEnabled: boolean | undefined;
+  readonly logger: DiscordBotLogger;
   readonly maximumGuildBotsPercentage: number | undefined;
   readonly minimumGuildMembersForFarmCheck: number | undefined;
 
-  private className: string;
   private client: Client;
 
   constructor(discordBotSettings: DiscordBotSettings) {
@@ -35,15 +39,13 @@ export class DiscordBot {
     this.onGuildJoined = discordBotSettings.onGuildJoined;
     this.onGuildLeft = discordBotSettings.onGuildLeft;
     this.onMention = discordBotSettings.onMention;
-    this.outputEnabled = discordBotSettings.outputEnabled;
+    this.logger = discordBotSettings.logger;
     this.maximumGuildBotsPercentage = discordBotSettings.maximumGuildBotsPercentage;
     this.minimumGuildMembersForFarmCheck = discordBotSettings.minimumGuildMembersForFarmCheck;
     this.initializeBot();
   }
 
   private initializeBot() {
-    this.className = `DiscordBot`;
-
     this.client = new Discord.Client();
 
     this.client.login(this.botAuthToken).then(this.noop, (error: Error) => this.onError(error, `client.login`));
@@ -62,19 +64,19 @@ export class DiscordBot {
       });
 
       if (guildIdentifications.length) {
-        this.output(`Currently running on the following ${guildIdentifications.length} server(s):\n${guildIdentifications.sort().join('\n')}`);
+        this.log(`Currently running on the following ${guildIdentifications.length} server(s):\n  ${guildIdentifications.sort().join('\n  ')}`);
       }
     });
 
     this.client.on('guildCreate', (guild: Guild) => {
-      this.output(`Joined guild "${guild.name}"`);
+      this.log(`Joined guild "${guild.name}"`);
       this.onGuildUpdate(guild);
       this.call(this.onGuildJoined, this, guild);
     });
     this.client.on('guildMemberAdd', (guild: Guild) => this.onGuildUpdate(guild));
     this.client.on('guildMemberRemove', (guild: Guild) => this.onGuildUpdate(guild));
     this.client.on('guildDelete', (guild: Guild) => {
-      this.output(`Left guild "${guild.name}"`);
+      this.log(`Left guild "${guild.name}"`);
       this.call(this.onGuildLeft, this, guild);
     });
 
@@ -115,7 +117,7 @@ export class DiscordBot {
         guild.leave().then(this.noop, (error: Error) => {
           this.onError(error, 'guild.leave');
         });
-        this.output(`Server "${guild.name}" has been marked as potential bot farm`);
+        this.log(`Server "${guild.name}" has been marked as potential bot farm`);
         return true;
       }
     }
@@ -151,14 +153,12 @@ export class DiscordBot {
     };
   }
 
-  private output(message: string): void {
-    if (this.outputEnabled) {
-      console.log(`${this.className}: ${message}`);
-    }
+  private log(message: string): void {
+    this.logger.info(message);
   }
 
-  private error(error: Error | any): void {
-    console.error(`${this.className}: ${error}`);
+  private error(error: any): void {
+    this.logger.error(error);
   }
 
   private noop(...params: any): void {

@@ -1,9 +1,7 @@
 import { Observable } from 'rxjs';
-import { Response } from 'request';
+import request, { Response } from 'request';
 
 import { GoogleSearchOptions, GoogleSearchResult, GoogleSearchResultItem } from './google-search.models';
-
-const request = require('request');
 
 export class GoogleSearchProvider {
 

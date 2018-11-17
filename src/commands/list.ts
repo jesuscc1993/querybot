@@ -1,9 +1,11 @@
 import { Message } from 'discord.js';
+import { Logger } from 'winston';
+import * as _ from 'lodash';
+
 import { DiscordBot } from '../discord-bot';
 import { ServerProvider } from '../providers/server/server.provider';
 import { OutputUtil } from '../utils/output.util';
 import { botColor, botPrefix } from '../settings/settings';
-import * as _ from 'lodash';
 
 export const listSites = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   if (parameters.length === 0) {
@@ -28,7 +30,7 @@ export const listSites = (discordBot: DiscordBot, message: Message, input: strin
         discordBot.sendMessage(message, `No keywords available. Use command \`${botPrefix}help\` to see how to add one.`);
       }
     }, (error) => {
-      OutputUtil.outputError(error, `App.sitesProvider.getServerSiteKeywords`, message.guild.id);
+      OutputUtil.outputError(discordBot.logger as Logger, error, `App.sitesProvider.getServerSiteKeywords`, message.guild.id);
       discordBot.sendError(message, error);
     });
 

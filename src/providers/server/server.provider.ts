@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Document, Model } from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 
 import { Server } from '../../models/server.model';
 import { SiteKeyword } from '../../models/site-keyword.model';
@@ -11,8 +11,7 @@ import { GoogleSearchOptions, GoogleSearchResultItem } from '../google-search/go
 
 import { serverSchema } from './server.schema';
 import { defaultSiteKeywordsMap } from '../../settings/settings';
-
-const mongoose = require('mongoose');
+import { Logger } from 'winston';
 
 export class ServerProvider {
 
@@ -44,7 +43,8 @@ export class ServerProvider {
     return ServerProvider._instance;
   }
 
-  public configure(googleSearchApiKey: string, googleSearchCx: string): void {
+  public configure(googleSearchApiKey: string, googleSearchCx: string, logger?: Logger): void {
+    this.mongooseDao.setLogger(logger);
     this.searchOptions = {
       cx: googleSearchCx,
       key: googleSearchApiKey

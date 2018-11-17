@@ -1,4 +1,7 @@
 import { Message } from 'discord.js';
+import { Logger } from 'winston';
+import * as _ from 'lodash';
+
 import { DiscordBot } from '../discord-bot';
 import { ServerProvider } from '../providers/server/server.provider';
 import { OutputUtil } from '../utils/output.util';
@@ -11,7 +14,7 @@ export const setSiteKeyword = (discordBot: DiscordBot, message: Message, input: 
       discordBot.sendMessage(message, `Successfully set site "${site}" to keyword "${keyword}".`);
 
     }, (error) => {
-      OutputUtil.outputError(error, `App.sitesProvider.setSiteKeyword`, message.guild.id, keyword, site);
+      OutputUtil.outputError(discordBot.logger as Logger, error, `App.sitesProvider.setSiteKeyword`, message.guild.id, keyword, site);
       discordBot.sendError(message, error);
     });
 

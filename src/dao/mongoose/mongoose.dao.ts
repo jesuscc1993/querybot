@@ -1,15 +1,13 @@
 import { Observable } from 'rxjs';
-import { Document, Model } from 'mongoose';
-
-const mongoose = require('mongoose');
+import { Logger } from 'winston';
+import mongoose, { Document, Model } from 'mongoose';
 
 export class MongooseDao {
+  private logger: Logger | undefined;
 
-  private loggingEnabled: boolean = false;
-
-  public errorMessages: any = {
-    moreThanOneMatch: 'More than one match found.'
-  };
+  public setLogger(logger: Logger | undefined) {
+    this.logger = logger;
+  }
 
   public connect(databaseUrl: string, databaseName: string): Observable<undefined> {
     return new Observable((observer) => {
@@ -28,7 +26,7 @@ export class MongooseDao {
           observer.error(error);
 
         } else {
-          this.output(`Updated document\n${JSON.stringify(document)}`);
+          this.info(`Updated document\n${JSON.stringify(document)}`);
           observer.next(document);
           observer.complete();
         }
@@ -39,7 +37,7 @@ export class MongooseDao {
   public saveDocument(document: Document): Observable<any> {
     return new Observable((observer) => {
       document.save().then((returnedDocument: Document) => {
-        this.output(`Saved document\n${JSON.stringify(returnedDocument)}`);
+        this.info(`Saved document\n${JSON.stringify(returnedDocument)}`);
         observer.next(returnedDocument);
         observer.complete();
 
@@ -79,7 +77,7 @@ export class MongooseDao {
           observer.error(error);
 
         } else {
-          this.output(`Found documents\n${JSON.stringify(documents)}`);
+          this.info(`Found documents\n${JSON.stringify(documents)}`);
           observer.next(documents);
           observer.complete();
         }
@@ -94,7 +92,7 @@ export class MongooseDao {
           observer.error(error);
 
         } else {
-          this.output(`Deleted document\n${JSON.stringify(document)}`);
+          this.info(`Deleted document\n${JSON.stringify(document)}`);
           observer.next(document);
           observer.complete();
         }
@@ -102,10 +100,8 @@ export class MongooseDao {
     });
   }
 
-  private output(message: any) {
-    if (this.loggingEnabled) {
-      console.log(message);
-    }
+  private info(message: string) {
+    if (this.logger) this.logger.info(message);
   }
 
 }

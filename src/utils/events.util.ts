@@ -1,24 +1,24 @@
-import { OutputUtil } from './output.util';
+import { Logger } from 'winston';
 
 export class EventsUtil {
-  public static setupHandlers() {
+  public static setupHandlers(logger: Logger) {
     const unhandledRejections: Map<Promise<any>, string> = new Map();
     process.on('exit', (exitCode: number) => {
-      OutputUtil.error(`Forced exit of code: ${exitCode}`);
+      logger.error(`Forced exit of code: ${exitCode}`);
     });
     process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
       unhandledRejections.set(promise, reason);
-      OutputUtil.error(`Unhandled rejection: ${promise} ${reason}`);
+      logger.error(`Unhandled rejection: ${promise} ${reason}`);
     });
     process.on('rejectionHandled', (promise: Promise<any>) => {
       unhandledRejections.delete(promise);
-      OutputUtil.error(`Rejection handled: ${promise}`);
+      logger.error(`Rejection handled: ${promise}`);
     });
     process.on('uncaughtException', (error: Error) => {
-      OutputUtil.error(`Caught exception: ${error}`);
+      logger.error(`Caught exception: ${error}`);
     });
     process.on('warning', (warning: any) => {
-      OutputUtil.error(`Process warning: ${warning.name}\nMessage: ${warning.message}\nStack trace:\n${warning.trace}`);
+      logger.error(`Process warning: ${warning.name}\nMessage: ${warning.message}\nStack trace:\n${warning.trace}`);
     });
   }
 }

@@ -1,10 +1,11 @@
 import { Observable } from 'rxjs';
 import { Guild, Message } from 'discord.js';
+import winston, { Logger } from 'winston';
 
 import { DiscordBot } from './discord-bot';
 import { ServerProvider } from './providers/server/server.provider';
-
 import { OutputUtil } from './utils/output.util';
+import { EventsUtil } from './utils/events.util';
 
 import {
   botAuthToken,
@@ -15,7 +16,8 @@ import {
   googleSearchCx,
   maximumGuildBotsPercentage,
   minimumGuildMembersForFarmCheck,
-  outputEnabled
+  logLevel,
+  logPath
 } from './settings/settings';
 
 import { displayHelp } from './commands/help';
@@ -25,22 +27,23 @@ import { setSiteKeyword } from './commands/set';
 import { unsetSiteKeyword } from './commands/unset';
 import { query } from './commands/query';
 
-const Discord = require('discord.js');
-
 export class QueryBot {
   private className: string;
+  private logger: Logger;
 
   private discordBot: DiscordBot;
   private serverProvider: ServerProvider;
 
-  public initialize() {
+  constructor(logger: Logger) {
     this.className = `QueryBot`;
+
+    this.logger = logger;
 
     this.serverProvider = ServerProvider.getInstance();
     this.serverProvider.configure(googleSearchApiKey, googleSearchCx);
 
     this.initializeDatabase().subscribe(() => {
-      OutputUtil.log(`${this.className}: Database connection successfully established`);
+      this.logger.info(`${this.className}: Database connection successfully established`);
       this.initializeBot();
 
     }, (error) => this.onError(error, `initializeDatabase`));
@@ -67,7 +70,7 @@ export class QueryBot {
       },
       onMention: this.onMention.bind(this),
       onGuildLeft: this.onGuildLeft.bind(this),
-      outputEnabled: outputEnabled,
+      logger: this.logger,
       maximumGuildBotsPercentage: maximumGuildBotsPercentage,
       minimumGuildMembersForFarmCheck: minimumGuildMembersForFarmCheck
     });
@@ -79,13 +82,13 @@ export class QueryBot {
 
   private onGuildLeft(discordBot: DiscordBot, guild: Guild): void {
     this.serverProvider.deleteServerById(guild.id).subscribe(() => {
-      OutputUtil.log(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
+      this.logger.info(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
 
     }, (error) => this.onError(error, `onGuildLeft`));
   }
 
   private onError(error: Error, functionName: string): void {
-    OutputUtil.outputError(error, `${this.className}.${functionName}`);
+    OutputUtil.outputError(this.logger, error, `${this.className}.${functionName}`);
   }
 
 }
