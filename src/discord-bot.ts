@@ -1,10 +1,9 @@
-import { Client, Guild, GuildMember, Message, MessageOptions, StringResolvable } from 'discord.js';
-import Discord from 'discord.js';
+import Discord, { Client, Guild, GuildMember, Message, MessageOptions, StringResolvable } from 'discord.js';
 
 export interface DiscordBotLogger {
-  info: (message: string) => void
-  warn: (message: string) => void
-  error: (error: any) => void
+  info: (message: string) => void;
+  warn: (message: string) => void;
+  error: (error: any) => void;
 }
 
 export interface DiscordBotSettings {
@@ -50,7 +49,7 @@ export class DiscordBot {
 
     this.client.login(this.botAuthToken).then(this.noop, (error: Error) => this.onError(error, `client.login`));
 
-    this.client.on('error', (error) => this.onError(error, `client.on('error'`));
+    this.client.on('error', error => this.onError(error, `client.on('error'`));
 
     this.client.on('ready', () => {
       this.setActivityMessage();
@@ -84,7 +83,7 @@ export class DiscordBot {
       const commandFound: boolean = message.content.indexOf(this.botPrefix) === 0 || message.content.indexOf(`\n${this.botPrefix}`) > 0;
 
       if (commandFound) {
-        message.content.split('\n').forEach((line) => {
+        message.content.split('\n').forEach(line => {
           if (this.isBotCommand(line)) {
             const input: string = line.substring(this.botPrefix.length);
             const command: string = input.split(' ')[0];
@@ -92,12 +91,14 @@ export class DiscordBot {
             (this.botCommands[command] || this.botCommands.default)(this, message, input, parameters);
           }
         });
-
       } else if (message.isMentioned(this.client.user)) {
         this.call(this.onMention, this, message);
       }
-
     });
+  }
+
+  public getClient(): Client {
+    return this.client;
   }
 
   private onGuildUpdate(guild: Guild): void {
@@ -113,7 +114,7 @@ export class DiscordBot {
         if (member.user.bot) botCount++;
       });
 
-      if (guild.members.size > this.minimumGuildMembersForFarmCheck && botCount * 100 / guild.members.size >= this.maximumGuildBotsPercentage) {
+      if (guild.members.size > this.minimumGuildMembersForFarmCheck && (botCount * 100) / guild.members.size >= this.maximumGuildBotsPercentage) {
         guild.leave().then(this.noop, (error: Error) => {
           this.onError(error, 'guild.leave');
         });
@@ -161,9 +162,7 @@ export class DiscordBot {
     this.logger.error(error);
   }
 
-  private noop(...params: any): void {
-
-  }
+  private noop(...params: any): void {}
 
   private call(method: Function | undefined, ...params: any): void {
     const finalMethod = typeof method === 'function' ? method : this.noop;
@@ -178,11 +177,13 @@ export class DiscordBot {
 
   public sendMessage(message: Message, messageContent: StringResolvable, messageOptions?: MessageOptions): void {
     if (message.guild.me.permissions.has('SEND_MESSAGES')) {
-      message.channel.send(messageContent, messageOptions).then(this.noop, (error) => {
+      message.channel.send(messageContent, messageOptions).then(this.noop, error => {
         this.onError(error, 'message.channel.send', messageContent, JSON.stringify(messageOptions));
       });
     } else {
-      message.author.send(`I don't have the permission to send messages on the server "${message.guild.name}". Please, contact the server admin to have this permission added.`);
+      message.author.send(
+        `I don't have the permission to send messages on the server "${message.guild.name}". Please, contact the server admin to have this permission added.`,
+      );
     }
   }
 
@@ -194,5 +195,4 @@ export class DiscordBot {
   public encodeUrl(url: string): string {
     return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
-
 }

@@ -17,5 +17,5 @@ export const maximumGuildBotsPercentage: number = 75;
 
 export const defaultSiteKeywordsMap = {
   yt: 'youtube.com',
-  tw: 'twitch.tv'
+  tw: 'twitch.tv',
 };

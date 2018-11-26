@@ -6,21 +6,23 @@ Bot that brings search functionalities to [Discord](https://discordapp.com/) tha
 
 ## Key Features
 
-* Keywords can be created and used to only search for results on certain websites.
-* Uses safe search on SFW channels and full search on NSFW channels.
-* Automatically leaves servers with > 25 members where over 75% of the member total is comprised of bots (configurable).
+- Keywords can be created and used to only search for results on certain websites.
+- Uses safe search on SFW channels and full search on NSFW channels.
+- Automatically leaves servers with > 25 members where over 75% of the member total is comprised of bots (configurable).
 
 ## Technologies
-* [TypeScript](https://www.typescriptlang.org/) is used to write all code and then transpiled into [JavaScript](https://www.javascript.com/)
-* [Lodash](https://lodash.com/) mostly facilitates data iteration
-* [node.js](https://nodejs.org/) runs the application
-* [Mongoose](https://mongoosejs.com/) acts as a middleware to handle data management with [MongoDB](https://www.mongodb.com/)
-* [discord.js](https://discord.js.org/#/) handles communication with the Discord API
+
+- [TypeScript](https://www.typescriptlang.org/) is used to write all code and then transpiled into [JavaScript](https://www.javascript.com/)
+- [Lodash](https://lodash.com/) mostly facilitates data iteration
+- [node.js](https://nodejs.org/) runs the application
+- [Mongoose](https://mongoosejs.com/) acts as a middleware to handle data management with [MongoDB](https://www.mongodb.com/)
+- [discord.js](https://discord.js.org/#/) handles communication with the Discord API
 
 ## Installation
 
 1. Install [node.js](https://nodejs.org/)
 2. Run the following command:
+
 ```
 npm i
 ```
@@ -55,7 +57,9 @@ Returns the first search result matching a query on the site corresponding to a 
 Returns the first search result matching a query on any site. Example: `!search discord bots`.
 
 ## Invite link
+
 [Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
 
 ## TODO
-* Enable to configure custom prefix by server
+
+- Enable to configure custom prefix by server

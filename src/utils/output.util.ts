@@ -1,7 +1,6 @@
-import { Logger } from "winston";
+import { Logger } from 'winston';
 
 export class OutputUtil {
-
   public static outputError(logger: Logger, error: Error, functionName: string, ...parameters: any): Function {
     let errorMessage: string = `${error} thrown`;
     if (functionName) errorMessage += ` when calling ${functionName}`;
@@ -11,5 +10,4 @@ export class OutputUtil {
       logger.error(error);
     };
   }
-
 }

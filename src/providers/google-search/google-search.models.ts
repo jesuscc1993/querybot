@@ -24,14 +24,14 @@ export interface GoogleSearchResultItem {
   pagemap: {
     cse_image?: {
       src: string;
-    }[]
+    }[];
     cse_thumbnail?: {
       width: string;
       height: string;
       src: string;
-    }[]
-    metatags?: {}[]
-  }
+    }[];
+    metatags?: {}[];
+  };
   snippet: string;
   title: string;
 }
