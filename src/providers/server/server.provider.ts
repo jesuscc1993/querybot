@@ -156,7 +156,8 @@ export class ServerProvider {
               searchOptions.siteSearch = site;
               onKeywordReady();
             } else {
-              observer.error(new Error('Invalid keyword.'));
+              // Disabled by request
+              // observer.error(new Error('Invalid keyword.'));
             }
           },
           error => observer.error(error),
