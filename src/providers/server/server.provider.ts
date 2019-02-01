@@ -156,7 +156,7 @@ export class ServerProvider {
               searchOptions.siteSearch = site;
               onKeywordReady();
             } else {
-              // Disabled by request
+              // Disabled by popular demand
               // observer.error(new Error('Invalid keyword.'));
             }
           },
