@@ -111,7 +111,7 @@ export class DiscordBot {
   }
 
   private setActivityMessage() {
-    const activityMessage: string = `${this.botPrefix}help | ${this.client.guilds.size} servers`;
+    const activityMessage: string = `${this.botPrefix} help | ${this.client.guilds.size} servers`;
     const activityOptions: { type: ActivityType } = { type: 'LISTENING' };
     this.client.user
       .setActivity(activityMessage, activityOptions)
