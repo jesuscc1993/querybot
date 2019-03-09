@@ -12,10 +12,10 @@ Bot that brings search functionalities to [Discord](https://discordapp.com/) tha
 
 ## Technologies
 
-- [TypeScript](https://www.typescriptlang.org/) is used to write all code and then transpiled into [JavaScript](https://www.javascript.com/)
-- [node.js](https://nodejs.org/) runs the application
-- [Mongoose](https://mongoosejs.com/) acts as a middleware to handle data management with [MongoDB](https://www.mongodb.com/)
-- [discord.js](https://discord.js.org/#/) handles communication with the Discord API
+- [TypeScript](https://www.typescriptlang.org/) is used to write all code and then transpiled into [JavaScript](https://www.javascript.com/).
+- [node.js](https://nodejs.org/) runs the application.
+- [Mongoose](https://mongoosejs.com/) acts as a middleware to handle data management with [MongoDB](https://www.mongodb.com/).
+- [discord.js](https://discord.js.org/#/) handles communication with the Discord API.
 
 ## Installation
 
@@ -40,20 +40,23 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 ## Commands
 
-`!qb help, !qb ?`
+`!qb help, !qb ?`  
 Displays the bot's help.
 
-`!qb list, !qb ls`
+`!qb list, !qb ls`  
 Displays all available keywords.
 
-`!qb set {keyword} {siteUrl}`
-Sets a site url to a keyword. Example: `!qb set yt youtube.com`.
+`!qb set {keyword} {siteUrl}`  
+Sets a site url to a keyword.  
+_Example: `!qb set yt youtube.com`._
 
-`!qb search {query}, !qb s {query}`
-Returns the first search result matching a query on any site. Example: `!qb search discord bots`.
+`!qb search {query}, !qb s {query}`  
+Returns the first search result matching a query on any site.  
+_Example: `!qb search discord bots`._
 
-`!{keyword} {query}`
-Returns the first search result matching a query on the site corresponding to a keyword. Example: `!yt GMM`.
+`!{keyword} {query}`  
+Returns the first search result matching a query on the site corresponding to a keyword.  
+_Example: `!yt GMM`._
 
 ## Invite link
 
