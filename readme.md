@@ -41,20 +41,20 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 ## Commands
 
-`!help, !?`
+`!qb help, !qb ?`
 Displays the bot's help.
 
-`!list, !ls`
+`!qb list, !qb ls`
 Displays all available keywords.
 
-`!set {keyword} {siteUrl}`
-Sets a site url to a keyword. Example: `!set yt youtube.com`.
+`!qb set {keyword} {siteUrl}`
+Sets a site url to a keyword. Example: `!qb set yt youtube.com`.
+
+`!qb search {query}, !qb s {query}`
+Returns the first search result matching a query on any site. Example: `!qb search discord bots`.
 
 `!{keyword} {query}`
 Returns the first search result matching a query on the site corresponding to a keyword. Example: `!yt GMM`.
-
-`!search {query}, !s {query}`
-Returns the first search result matching a query on any site. Example: `!search discord bots`.
 
 ## Invite link
 
