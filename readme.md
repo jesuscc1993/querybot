@@ -13,7 +13,6 @@ Bot that brings search functionalities to [Discord](https://discordapp.com/) tha
 ## Technologies
 
 - [TypeScript](https://www.typescriptlang.org/) is used to write all code and then transpiled into [JavaScript](https://www.javascript.com/)
-- [Lodash](https://lodash.com/) mostly facilitates data iteration
 - [node.js](https://nodejs.org/) runs the application
 - [Mongoose](https://mongoosejs.com/) acts as a middleware to handle data management with [MongoDB](https://www.mongodb.com/)
 - [discord.js](https://discord.js.org/#/) handles communication with the Discord API
