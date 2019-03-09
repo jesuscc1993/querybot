@@ -1,19 +1,19 @@
-export const botPrefix: string = '!';
-export const botName: string = 'QueryBot';
-export const botColor: number = 7506394;
-export const botAuthToken: string = 'FILL_ME';
+export const botPrefix = '!';
+export const botName = 'QueryBot';
+export const botColor = 7506394;
+export const botAuthToken = 'FILL_ME';
 
-export const logLevel: string = 'info';
-export const logPath: string = 'logs';
+export const logLevel = 'info';
+export const logPath = 'logs';
 
-export const databaseUrl: string = 'FILL_ME';
-export const databaseName: string = 'FILL_ME';
+export const databaseUrl = 'FILL_ME';
+export const databaseName = 'FILL_ME';
 
-export const googleSearchApiKey: string = 'FILL_ME';
-export const googleSearchCx: string = 'FILL_ME';
+export const googleSearchApiKey = 'FILL_ME';
+export const googleSearchCx = 'FILL_ME';
 
-export const minimumGuildMembersForFarmCheck: number = 25;
-export const maximumGuildBotsPercentage: number = 75;
+export const minimumGuildMembersForFarmCheck = 25;
+export const maximumGuildBotsPercentage = 75;
 
 export const defaultSiteKeywordsMap = {
   yt: 'youtube.com',

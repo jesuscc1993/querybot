@@ -1,15 +1,9 @@
 import { Guild, Message, TextChannel } from 'discord.js';
 import { Observable } from 'rxjs';
-import { Logger } from 'winston';
 
-import { displayAbout } from './commands/about';
-import { displayHelp } from './commands/help';
-import { listSites } from './commands/list';
-import { query } from './commands/query';
-import { setSiteKeyword } from './commands/set';
-import { unsetSiteKeyword } from './commands/unset';
-import { DiscordBot } from './discord-bot';
-import { ServerProvider } from './providers/server/server.provider';
+import { displayAbout, displayHelp, listSites, query, setSiteKeyword, unsetSiteKeyword } from '../../commands';
+import { outputError } from '../../domain';
+import { ServerProvider } from '../../providers';
 import {
   botAuthToken,
   botPrefix,
@@ -19,17 +13,17 @@ import {
   googleSearchCx,
   maximumGuildBotsPercentage,
   minimumGuildMembersForFarmCheck,
-} from './settings/settings';
-import { OutputUtil } from './utils/output.util';
+} from '../../settings';
+import { DiscordBot, DiscordBotLogger } from '../discord-bot';
 
 export class QueryBot {
   private className: string;
-  private logger: Logger;
+  private logger: DiscordBotLogger;
 
   private discordBot: DiscordBot;
   private serverProvider: ServerProvider;
 
-  constructor(logger: Logger) {
+  constructor(logger: DiscordBotLogger) {
     this.className = `QueryBot`;
 
     this.logger = logger;
@@ -47,10 +41,7 @@ export class QueryBot {
   }
 
   private initializeDatabase(): Observable<undefined> {
-    return this.serverProvider.connect(
-      databaseUrl,
-      databaseName,
-    );
+    return this.serverProvider.connect(databaseUrl, databaseName);
   }
 
   private initializeBot() {
@@ -77,18 +68,18 @@ export class QueryBot {
     });
   }
 
-  private onMention(discordBot: DiscordBot, message: Message): void {
+  private onMention(discordBot: DiscordBot, message: Message) {
     discordBot.sendMessage(message, `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix}help\`.`);
   }
 
-  private onGuildJoined(discordBot: DiscordBot, guild: Guild): void {
+  private onGuildJoined(discordBot: DiscordBot, guild: Guild) {
     const systemChannel: TextChannel = discordBot.getClient().channels.get(guild.systemChannelID) as TextChannel;
     if (systemChannel) {
       systemChannel.send(`Thanks for inviting me.\nIf you need anything, you can see my commands by sending the message \`${botPrefix}help\`.`);
     }
   }
 
-  private onGuildLeft(discordBot: DiscordBot, guild: Guild): void {
+  private onGuildLeft(discordBot: DiscordBot, guild: Guild) {
     this.serverProvider.deleteServerById(guild.id).subscribe(
       () => {
         this.logger.info(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
@@ -97,7 +88,7 @@ export class QueryBot {
     );
   }
 
-  private onError(error: Error, functionName: string): void {
-    OutputUtil.outputError(this.logger, error, `${this.className}.${functionName}`);
+  private onError(error: Error | string, functionName: string) {
+    outputError(this.logger, error, `${this.className}.${functionName}`);
   }
 }

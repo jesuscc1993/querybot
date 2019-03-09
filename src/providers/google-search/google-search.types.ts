@@ -1,4 +1,4 @@
-export interface GoogleSearchOptions {
+export type GoogleSearchOptions = {
   [key: string]: any;
   cx: string;
   key: string;
@@ -6,13 +6,13 @@ export interface GoogleSearchOptions {
   safe?: string;
   siteSearch?: string;
   start?: number;
-}
+};
 
-export interface GoogleSearchResult {
+export type GoogleSearchResult = {
   items: GoogleSearchResultItem[];
-}
+};
 
-export interface GoogleSearchResultItem {
+export type GoogleSearchResultItem = {
   cacheId: string;
   displayLink: string;
   formattedUrl: string;
@@ -34,4 +34,4 @@ export interface GoogleSearchResultItem {
   };
   snippet: string;
   title: string;
-}
+};

@@ -1,24 +1,23 @@
 import mongoose, { Document, Model } from 'mongoose';
 import { Observable } from 'rxjs';
-import { Logger } from 'winston';
 
-import { MongooseDao } from '../../dao/mongoose/mongoose.dao';
-import { Server } from '../../models/server.model';
-import { SiteKeyword } from '../../models/site-keyword.model';
-import { defaultSiteKeywordsMap } from '../../settings/settings';
-import { GoogleSearchOptions, GoogleSearchResultItem } from '../google-search/google-search.models';
+import { DiscordBotLogger } from '../../modules/discord-bot';
+import { DocumentDao } from '../../persistence/document.dao';
+import { defaultSiteKeywordsMap } from '../../settings';
 import { GoogleSearchProvider } from '../google-search/google-search.provider';
-import { serverSchema } from './server.schema';
+import { GoogleSearchOptions, GoogleSearchResultItem } from '../google-search/google-search.types';
+import { getServerKeywordsMap, getServerSchema } from './server.domain';
+import { KeywordsMap, Server, SiteKeyword } from './server.types';
 
 export class ServerProvider {
   readonly serverDocument: Model<any>;
-  readonly mongooseDao: MongooseDao;
+  readonly documentDao: DocumentDao;
 
   readonly googleSearchProvider: GoogleSearchProvider;
 
-  readonly serverSiteKeywordsMap: any;
+  readonly serverSiteKeywordsMap: { [serverID: string]: KeywordsMap };
 
-  protected static _instance: any = new ServerProvider();
+  protected static _instance: ServerProvider = new ServerProvider();
   private searchOptions: GoogleSearchOptions;
 
   constructor() {
@@ -27,8 +26,8 @@ export class ServerProvider {
     }
     ServerProvider._instance = this;
 
-    this.serverDocument = mongoose.model('Server', serverSchema);
-    this.mongooseDao = new MongooseDao();
+    this.serverDocument = mongoose.model('Server', getServerSchema());
+    this.documentDao = new DocumentDao();
 
     this.googleSearchProvider = new GoogleSearchProvider();
 
@@ -39,8 +38,8 @@ export class ServerProvider {
     return ServerProvider._instance;
   }
 
-  public configure(googleSearchApiKey: string, googleSearchCx: string, logger?: Logger): void {
-    this.mongooseDao.setLogger(logger);
+  public configure(googleSearchApiKey: string, googleSearchCx: string, logger?: DiscordBotLogger) {
+    this.documentDao.configure(logger);
     this.searchOptions = {
       cx: googleSearchCx,
       key: googleSearchApiKey,
@@ -48,10 +47,7 @@ export class ServerProvider {
   }
 
   public connect(databaseUrl: string, databaseName: string): Observable<undefined> {
-    return this.mongooseDao.connect(
-      databaseUrl,
-      databaseName,
-    );
+    return this.documentDao.connect(databaseUrl, databaseName);
   }
 
   public setSiteKeyword(serverId: string, keyword: string, url: string): Observable<undefined> {
@@ -98,7 +94,7 @@ export class ServerProvider {
 
   public getSiteKeyword(serverId: string, keyword: string): Observable<string> {
     return new Observable(observer => {
-      const onCompletion: Function = (keyword: string) => {
+      const onCompletion = (keyword: string) => {
         observer.next(keyword);
         observer.complete();
       };
@@ -139,7 +135,7 @@ export class ServerProvider {
     return new Observable(observer => {
       let searchOptions: GoogleSearchOptions = Object.assign({ num: 1, safe: nsfw ? 'off' : 'active' }, this.searchOptions);
 
-      const onKeywordReady: Function = () => {
+      const onKeywordReady = () => {
         this.googleSearchProvider.search(query, searchOptions).subscribe(
           searchResults => {
             observer.next(searchResults);
@@ -170,8 +166,8 @@ export class ServerProvider {
 
   private getServerSiteKeywordsMapOrSetDefaults(serverId: string): Observable<any> {
     return new Observable(observer => {
-      const onCompletion: Function = (server: Server) => {
-        const keywordsMap: any = this.getServerKeywordsMap(server);
+      const onCompletion = (server: Server) => {
+        const keywordsMap: any = getServerKeywordsMap(server);
         this.serverSiteKeywordsMap[serverId] = keywordsMap;
         observer.next(keywordsMap);
         observer.complete();
@@ -199,25 +195,25 @@ export class ServerProvider {
   }
 
   public saveServer(server: Server): Observable<any> {
-    return this.mongooseDao.saveDocument(this.serverToDocument(server));
+    return this.documentDao.saveDocument(this.serverToDocument(server));
   }
 
   public updateServer(server: Server): Observable<any> {
-    return this.mongooseDao.updateDocument(this.serverDocument, { _id: server._id }, this.serverToDocument(server));
+    return this.documentDao.updateDocument(this.serverDocument, { _id: server._id }, this.serverToDocument(server));
   }
 
   public saveOrUpdateServer(server: Server): Observable<any> {
-    return this.mongooseDao.saveOrUpdateDocument(this.serverDocument, { _id: server._id }, this.serverToDocument(server));
+    return this.documentDao.saveOrUpdateDocument(this.serverDocument, { _id: server._id }, this.serverToDocument(server));
   }
 
   public deleteServerById(serverId: string): Observable<any> {
     const server: Server = { _id: serverId };
-    return this.mongooseDao.deleteDocument(this.serverDocument, { _id: serverId }, this.serverToDocument(server));
+    return this.documentDao.deleteDocument(this.serverDocument, { _id: serverId }, this.serverToDocument(server));
   }
 
   public findServerById(serverId: string): Observable<Server | undefined> {
     return new Observable(observer => {
-      this.mongooseDao.findDocuments(this.serverDocument, { _id: serverId }).subscribe(
+      this.documentDao.findDocuments(this.serverDocument, { _id: serverId }).subscribe(
         servers => {
           observer.next(servers.length ? servers[0] : undefined);
           observer.complete();
@@ -232,13 +228,5 @@ export class ServerProvider {
       _id: server._id,
       keywordsMap: server.keywordsMap,
     });
-  }
-
-  private getServerKeywordsMap(server: Server): any {
-    return server ? server.keywordsMap : undefined;
-  }
-
-  private getServerSite(server: Server, keyword: string): any {
-    return server && server.keywordsMap ? server.keywordsMap[keyword] : undefined;
   }
 }

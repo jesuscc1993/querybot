@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 
-import { DiscordBot } from '../discord-bot';
-import { botColor, botPrefix } from '../settings/settings';
+import { DiscordBot } from '../modules/discord-bot';
+import { botColor, botPrefix } from '../settings';
 
 export const displayHelp = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   discordBot.sendMessage(message, undefined, {

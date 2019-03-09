@@ -1,10 +1,11 @@
-import winston, { Logger } from 'winston';
+import winston from 'winston';
 
-import { QueryBot } from './query-bot';
-import { logLevel, logPath } from './settings/settings';
-import { EventsUtil } from './utils/events.util';
+import { setupEventHandlers } from './domain';
+import { QueryBot } from './modules/core';
+import { DiscordBotLogger } from './modules/discord-bot';
+import { logLevel, logPath } from './settings';
 
-const logger: Logger = winston.createLogger({
+const logger: DiscordBotLogger = <DiscordBotLogger>winston.createLogger({
   format: winston.format.simple(),
   level: logLevel,
   transports: [
@@ -13,6 +14,6 @@ const logger: Logger = winston.createLogger({
   ],
 });
 
-EventsUtil.setupHandlers(logger);
+setupEventHandlers(logger);
 
 new QueryBot(logger);

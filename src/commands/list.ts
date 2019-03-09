@@ -1,10 +1,9 @@
 import { Message } from 'discord.js';
-import { Logger } from 'winston';
 
-import { DiscordBot } from '../discord-bot';
-import { ServerProvider } from '../providers/server/server.provider';
-import { botColor, botPrefix } from '../settings/settings';
-import { OutputUtil } from '../utils/output.util';
+import { outputError } from '../domain';
+import { DiscordBot } from '../modules/discord-bot';
+import { ServerProvider } from '../providers';
+import { botColor, botPrefix } from '../settings';
 
 export const listSites = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   if (parameters.length === 0) {
@@ -14,9 +13,11 @@ export const listSites = (discordBot: DiscordBot, message: Message, input: strin
         siteKeywords => {
           if (siteKeywords.length) {
             let list: string = '';
-            siteKeywords.sort((a, b) => a.keyword > b.keyword ? 1 : -1).forEach(site => {
-              list += `• **${site.keyword}** (${site.url})\n`;
-            });
+            siteKeywords
+              .sort((a, b) => (a.keyword > b.keyword ? 1 : -1))
+              .forEach(site => {
+                list += `• **${site.keyword}** (${site.url})\n`;
+              });
             list = list.substring(0, list.length - 1); // remove last line break
 
             discordBot.sendMessage(message, undefined, {
@@ -31,7 +32,7 @@ export const listSites = (discordBot: DiscordBot, message: Message, input: strin
           }
         },
         error => {
-          OutputUtil.outputError(discordBot.logger as Logger, error, `App.sitesProvider.getServerSiteKeywords`, message.guild.id);
+          outputError(discordBot.logger, error, `App.sitesProvider.getServerSiteKeywords`, message.guild.id);
           discordBot.sendError(message, error);
         },
       );

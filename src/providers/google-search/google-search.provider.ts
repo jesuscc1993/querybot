@@ -1,7 +1,7 @@
 import request, { Response } from 'request';
 import { Observable } from 'rxjs';
 
-import { GoogleSearchOptions, GoogleSearchResult, GoogleSearchResultItem } from './google-search.models';
+import { GoogleSearchOptions, GoogleSearchResult, GoogleSearchResultItem } from './google-search.types';
 
 export class GoogleSearchProvider {
   private session = request.defaults({ jar: true });

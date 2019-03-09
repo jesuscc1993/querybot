@@ -1,9 +1,8 @@
 import { Message } from 'discord.js';
-import { Logger } from 'winston';
 
-import { DiscordBot } from '../discord-bot';
-import { ServerProvider } from '../providers/server/server.provider';
-import { OutputUtil } from '../utils/output.util';
+import { outputError } from '../domain';
+import { DiscordBot } from '../modules/discord-bot';
+import { ServerProvider } from '../providers';
 
 export const setSiteKeyword = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   if (parameters.length === 2) {
@@ -16,7 +15,7 @@ export const setSiteKeyword = (discordBot: DiscordBot, message: Message, input: 
           discordBot.sendMessage(message, `Successfully set site "${site}" to keyword "${keyword}".`);
         },
         error => {
-          OutputUtil.outputError(discordBot.logger as Logger, error, `App.sitesProvider.setSiteKeyword`, message.guild.id, keyword, site);
+          outputError(discordBot.logger, error, `App.sitesProvider.setSiteKeyword`, message.guild.id, keyword, site);
           discordBot.sendError(message, error);
         },
       );
