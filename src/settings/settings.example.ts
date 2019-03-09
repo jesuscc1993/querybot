@@ -1,4 +1,5 @@
-export const botPrefix = '!';
+export const botPrefixDefault = '!';
+export const botPrefix = `${botPrefixDefault}qb`;
 export const botName = 'QueryBot';
 export const botColor = 7506394;
 export const botAuthToken = 'FILL_ME';

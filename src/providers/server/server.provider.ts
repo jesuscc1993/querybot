@@ -120,7 +120,9 @@ export class ServerProvider {
 
           const siteKeywords: SiteKeyword[] = [];
           if (keywordsMap) {
-            Object.keys(keywordsMap).forEach(keyword => siteKeywords.push({ keyword: keyword, url: keywordsMap[keyword] }));
+            Object.keys(keywordsMap).forEach(keyword =>
+              siteKeywords.push({ keyword: keyword, url: keywordsMap[keyword] }),
+            );
           }
 
           observer.next(siteKeywords);
@@ -131,9 +133,17 @@ export class ServerProvider {
     });
   }
 
-  public search(serverId: string, query: string, nsfw: boolean, keyword?: string): Observable<GoogleSearchResultItem[]> {
+  public search(
+    serverId: string,
+    query: string,
+    nsfw: boolean,
+    keyword?: string,
+  ): Observable<GoogleSearchResultItem[]> {
     return new Observable(observer => {
-      let searchOptions: GoogleSearchOptions = Object.assign({ num: 1, safe: nsfw ? 'off' : 'active' }, this.searchOptions);
+      let searchOptions: GoogleSearchOptions = Object.assign(
+        { num: 1, safe: nsfw ? 'off' : 'active' },
+        this.searchOptions,
+      );
 
       const onKeywordReady = () => {
         this.googleSearchProvider.search(query, searchOptions).subscribe(
@@ -203,7 +213,11 @@ export class ServerProvider {
   }
 
   public saveOrUpdateServer(server: Server): Observable<any> {
-    return this.documentDao.saveOrUpdateDocument(this.serverDocument, { _id: server._id }, this.serverToDocument(server));
+    return this.documentDao.saveOrUpdateDocument(
+      this.serverDocument,
+      { _id: server._id },
+      this.serverToDocument(server),
+    );
   }
 
   public deleteServerById(serverId: string): Observable<any> {

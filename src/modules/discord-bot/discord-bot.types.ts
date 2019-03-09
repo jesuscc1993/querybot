@@ -10,6 +10,7 @@ export type DiscordBotLogger = {
 
 export type DiscordBotSettings = {
   botPrefix: string;
+  botPrefixDefault?: string;
   botAuthToken: string;
   botCommands: { [name: string]: Function };
   onGuildJoined?: (discordBot: DiscordBot, guild: Guild) => void;

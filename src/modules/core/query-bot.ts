@@ -7,6 +7,7 @@ import { ServerProvider } from '../../providers';
 import {
   botAuthToken,
   botPrefix,
+  botPrefixDefault,
   databaseName,
   databaseUrl,
   googleSearchApiKey,
@@ -46,36 +47,43 @@ export class QueryBot {
 
   private initializeBot() {
     this.discordBot = new DiscordBot({
-      botPrefix: botPrefix,
-      botAuthToken: botAuthToken,
+      botAuthToken,
+      botPrefix,
+      botPrefixDefault,
+      maximumGuildBotsPercentage,
+      minimumGuildMembersForFarmCheck,
       botCommands: {
-        about: displayAbout.bind(this),
-        help: displayHelp.bind(this),
         '?': displayHelp.bind(this),
+        about: displayAbout.bind(this),
+        default: query.bind(this),
+        help: displayHelp.bind(this),
         list: listSites.bind(this),
         ls: listSites.bind(this),
+        s: query.bind(this),
+        search: query.bind(this),
         set: setSiteKeyword.bind(this),
         unset: unsetSiteKeyword.bind(this),
-        search: query.bind(this),
-        default: query.bind(this),
       },
+      logger: this.logger,
       onMention: this.onMention.bind(this),
       onGuildJoined: this.onGuildJoined.bind(this),
       onGuildLeft: this.onGuildLeft.bind(this),
-      logger: this.logger,
-      maximumGuildBotsPercentage: maximumGuildBotsPercentage,
-      minimumGuildMembersForFarmCheck: minimumGuildMembersForFarmCheck,
     });
   }
 
   private onMention(discordBot: DiscordBot, message: Message) {
-    discordBot.sendMessage(message, `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix}help\`.`);
+    discordBot.sendMessage(
+      message,
+      `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix} help\`.`,
+    );
   }
 
   private onGuildJoined(discordBot: DiscordBot, guild: Guild) {
     const systemChannel: TextChannel = discordBot.getClient().channels.get(guild.systemChannelID) as TextChannel;
     if (systemChannel) {
-      systemChannel.send(`Thanks for inviting me.\nIf you need anything, you can see my commands by sending the message \`${botPrefix}help\`.`);
+      systemChannel.send(
+        `Thanks for inviting me.\nIf you need anything, you can see my commands by sending the message \`${botPrefix} help\`.`,
+      );
     }
   }
 

@@ -3,18 +3,14 @@ import { Message, TextChannel } from 'discord.js';
 import { outputError } from '../domain';
 import { DiscordBot } from '../modules/discord-bot';
 import { GoogleSearchResultItem, ServerProvider } from '../providers';
+import { botPrefix, botPrefixDefault } from '../settings';
 
 export const query = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
-  const queryParameters: string[] = input.split(' ');
-  let keyword: string | undefined = queryParameters.splice(0, 1)[0];
+  const keywordSearch: boolean = input.indexOf(botPrefix) < 0;
+  const keyword = keywordSearch ? input.split(' ')[0].substring(botPrefixDefault.length) : undefined;
 
-  const genericSearch: boolean = keyword === 'search' || keyword === 's';
-  if (genericSearch) {
-    keyword = undefined;
-  }
-
-  if (queryParameters.length >= 1) {
-    const search: string = queryParameters.join(' ');
+  if (parameters.length) {
+    const search: string = parameters.join(' ');
     const nsfw: boolean = (<TextChannel>message.channel).nsfw;
 
     ServerProvider.getInstance()
@@ -33,11 +29,16 @@ export const query = (discordBot: DiscordBot, message: Message, input: string, p
           }
         },
         error => {
-          outputError(discordBot.logger, error, `App.serverProvider.search`, message.guild.id, search, nsfw, keyword);
+          outputError(discordBot.logger, error, `ServerProvider.getInstance().search`, [
+            message.guild.id,
+            search,
+            nsfw,
+            keyword,
+          ]);
           discordBot.sendError(message, error);
         },
       );
-  } else if (genericSearch) {
+  } else if (!keywordSearch) {
     discordBot.onWrongParameterCount(message);
   }
 };
