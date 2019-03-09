@@ -1,4 +1,3 @@
-import moment from 'moment';
 import winston, { Logger } from 'winston';
 
 import { QueryBot } from './query-bot';
@@ -10,7 +9,7 @@ const logger: Logger = winston.createLogger({
   level: logLevel,
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: `${logPath}/querybot-${moment.utc(new Date()).format('YYYY-MM-DD')}.log` }),
+    new winston.transports.File({ filename: `${logPath}/querybot-${new Date().toISOString().split('T')[0]}.log` }),
   ],
 });
 

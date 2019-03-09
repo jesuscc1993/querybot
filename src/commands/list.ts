@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import * as _ from 'lodash';
 import { Logger } from 'winston';
 
 import { DiscordBot } from '../discord-bot';
@@ -15,7 +14,7 @@ export const listSites = (discordBot: DiscordBot, message: Message, input: strin
         siteKeywords => {
           if (siteKeywords.length) {
             let list: string = '';
-            _.orderBy(siteKeywords, 'keyword').forEach(site => {
+            siteKeywords.sort((a, b) => a.keyword > b.keyword ? 1 : -1).forEach(site => {
               list += `• **${site.keyword}** (${site.url})\n`;
             });
             list = list.substring(0, list.length - 1); // remove last line break
