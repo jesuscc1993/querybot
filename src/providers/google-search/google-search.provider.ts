@@ -15,7 +15,7 @@ export class GoogleSearchProvider {
 
       this.session.get(
         {
-          uri: searchUri,
+          uri: encodeURI(searchUri),
           followRedirect: false,
         },
         (error: Error, response: Response) => {
