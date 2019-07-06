@@ -6,7 +6,7 @@ import { GoogleSearchResultItem, ServerProvider } from '../providers';
 import { botPrefix, botPrefixDefault } from '../settings';
 
 export const query = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
-  const keywordSearch: boolean = input.indexOf(botPrefix) < 0;
+  const keywordSearch: boolean = !input.includes(botPrefix);
   const keyword = keywordSearch ? input.split(' ')[0].substring(botPrefixDefault.length) : undefined;
 
   if (parameters.length) {
