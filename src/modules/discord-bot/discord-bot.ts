@@ -169,7 +169,12 @@ export class DiscordBot {
 
   public sendError(message: Message, error: Error | string) {
     const errorMessage: string = (<Error>error).message || <string>error;
-    this.sendMessage(message, errorMessage || `My apologies. I had some trouble processing your request.`);
+    this.sendMessage(message, undefined, {
+      embed: {
+        description: `**Error:** ${errorMessage || 'My apologies. I had some trouble processing your request.'}`,
+        color: 15158332,
+      },
+    });
   }
 
   public hasPermission({ permissions }: GuildMember, permission: PermissionResolvable, checkAdmin?: boolean) {
