@@ -64,4 +64,5 @@ _Example: `!yt GMM`._
 
 ## TODO
 
+- Restrict set command to admins
 - Enable to configure custom prefix by server
