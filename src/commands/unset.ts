@@ -3,9 +3,15 @@ import { Message } from 'discord.js';
 import { outputError } from '../domain';
 import { DiscordBot } from '../modules/discord-bot';
 import { ServerProvider } from '../providers';
+import { botPrefix } from '../settings';
 
 export const unsetSiteKeyword = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   if (parameters.length >= 1) {
+    if (!discordBot.hasPermission(message.member, 'ADMINISTRATOR')) {
+      discordBot.sendError(message, `\`\`${botPrefix} unset\`\` command is restricted to administrators.`);
+      return;
+    }
+
     const keyword: string = parameters[0];
     ServerProvider.getInstance()
       .unsetSiteKeyword(message.guild.id, keyword)

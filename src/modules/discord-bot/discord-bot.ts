@@ -1,4 +1,13 @@
-import Discord, { ActivityType, Client, Guild, GuildMember, Message, MessageOptions, StringResolvable } from 'discord.js';
+import Discord, {
+  ActivityType,
+  Client,
+  Guild,
+  GuildMember,
+  Message,
+  MessageOptions,
+  PermissionResolvable,
+  StringResolvable,
+} from 'discord.js';
 import { noop } from 'rxjs';
 
 import { execute, getParametersFromLine, lineContainsPrefix, messageContainsPrefix } from './discord-bot.domain';
@@ -161,5 +170,9 @@ export class DiscordBot {
   public sendError(message: Message, error: Error | string) {
     const errorMessage: string = (<Error>error).message || <string>error;
     this.sendMessage(message, errorMessage || `My apologies. I had some trouble processing your request.`);
+  }
+
+  public hasPermission({ permissions }: GuildMember, permission: PermissionResolvable, checkAdmin?: boolean) {
+    return permissions.has(permission, checkAdmin);
   }
 }

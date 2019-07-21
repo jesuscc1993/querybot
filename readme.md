@@ -40,6 +40,9 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 ## Commands
 
+`!qb about`  
+Displays information about the bot.
+
 `!qb help, !qb ?`  
 Displays the bot's help.
 
@@ -47,8 +50,12 @@ Displays the bot's help.
 Displays all available keywords.
 
 `!qb set {keyword} {siteUrl}`  
-Sets a site url to a keyword.  
+Sets a site keyword.  
 _Example: `!qb set yt youtube.com`._
+
+`!qb unset {keyword}`  
+Unsets a site keyword.  
+_Example: `!qb unset yt`._
 
 `!qb search {query}, !qb s {query}`  
 Returns the first search result matching a query on any site.  
@@ -64,5 +71,4 @@ _Example: `!yt GMM`._
 
 ## TODO
 
-- Restrict set command to admins
 - Enable to configure custom prefix by server
