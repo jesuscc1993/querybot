@@ -55,7 +55,7 @@ export class QueryBot {
       botCommands: {
         '?': displayHelp.bind(this),
         about: displayAbout.bind(this),
-        // default: query.bind(this),
+        default: query.bind(this),
         help: displayHelp.bind(this),
         list: listSites.bind(this),
         ls: listSites.bind(this),
