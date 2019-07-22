@@ -236,6 +236,15 @@ diagnostics@^1.1.1:
     enabled "1.0.x"
     kuler "1.0.x"
 
+discord-bot@jesuscc1993/discord-bot#dist:
+  version "1.0.0"
+  resolved "https://codeload.github.com/jesuscc1993/discord-bot/tar.gz/4fbbfed8cf8fcb252c7d7404348d7ffe0955a9db"
+  dependencies:
+    "@types/node" "^7.0.7"
+    discord.js "^11.4.2"
+    rxjs "^6.3.2"
+    typescript "^3.0.3"
+
 discord.js@^11.4.2:
   version "11.4.2"
   resolved "https://registry.yarnpkg.com/discord.js/-/discord.js-11.4.2.tgz#54586981926521572051f2a30b984aad2b49786e"

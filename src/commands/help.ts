@@ -1,6 +1,6 @@
+import { DiscordBot } from 'discord-bot';
 import { Message } from 'discord.js';
 
-import { DiscordBot } from '../modules/discord-bot';
 import { botColor, botPrefix, botPrefixDefault } from '../settings';
 
 export const displayHelp = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {

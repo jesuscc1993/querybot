@@ -1,3 +1,4 @@
+import { DiscordBot, DiscordBotLogger } from 'discord-bot';
 import { Guild, Message, TextChannel } from 'discord.js';
 import { Observable } from 'rxjs';
 
@@ -15,7 +16,6 @@ import {
   maximumGuildBotsPercentage,
   minimumGuildMembersForFarmCheck,
 } from '../../settings';
-import { DiscordBot, DiscordBotLogger } from '../discord-bot';
 
 export class QueryBot {
   private className: string;

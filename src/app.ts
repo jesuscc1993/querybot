@@ -1,8 +1,8 @@
+import { DiscordBotLogger } from 'discord-bot/dist/discord-bot.types';
 import winston from 'winston';
 
 import { setupEventHandlers } from './domain';
 import { QueryBot } from './modules/core';
-import { DiscordBotLogger } from './modules/discord-bot';
 import { logLevel, logPath } from './settings';
 
 const logger: DiscordBotLogger = <DiscordBotLogger>winston.createLogger({

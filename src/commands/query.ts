@@ -1,7 +1,7 @@
+import { DiscordBot } from 'discord-bot';
 import { Message, TextChannel } from 'discord.js';
 
 import { outputError } from '../domain';
-import { DiscordBot } from '../modules/discord-bot';
 import { GoogleSearchResultItem, ServerProvider } from '../providers';
 import { botPrefix, botPrefixDefault } from '../settings';
 

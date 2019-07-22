@@ -1,7 +1,7 @@
+import { DiscordBotLogger } from 'discord-bot';
 import mongoose from 'mongoose';
 import { Observable } from 'rxjs';
 
-import { DiscordBotLogger } from '../../modules/discord-bot';
 import { IDao } from '../dao.types';
 
 export class MongooseDao implements IDao {

@@ -1,7 +1,7 @@
+import { DiscordBotLogger } from 'discord-bot';
 import mongoose, { Document, Model } from 'mongoose';
 import { Observable } from 'rxjs';
 
-import { DiscordBotLogger } from '../../modules/discord-bot';
 import { DocumentDao } from '../../persistence/document.dao';
 import { defaultSiteKeywordsMap } from '../../settings';
 import { GoogleSearchProvider } from '../google-search/google-search.provider';
