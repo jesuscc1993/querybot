@@ -70,11 +70,11 @@ export class DiscordBot {
 
     this.client.on('message', (message: Message) => {
       if (
-        messageContainsPrefix(message, this.botPrefix) ||
-        (this.botPrefixDefault && messageContainsPrefix(message, this.botPrefixDefault))
+        messageContainsPrefix(message.content, this.botPrefix) ||
+        (this.botPrefixDefault && messageContainsPrefix(message.content, this.botPrefixDefault))
       ) {
         message.content.split('\n').forEach(line => {
-          if (lineContainsPrefix(line, this.botPrefix)) {
+          if (lineContainsPrefix(line, `${this.botPrefix} `)) {
             const command: string = line.substring(this.botPrefix.length + 1).split(' ')[0];
             const parsedLine = line.substring(this.botPrefix.length + 1 + command.length);
             execute(this.botCommands[command], this, message, line, getParametersFromLine(parsedLine));

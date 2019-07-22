@@ -6,10 +6,10 @@ import { GoogleSearchResultItem, ServerProvider } from '../providers';
 import { botPrefix, botPrefixDefault } from '../settings';
 
 export const query = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
-  const keywordSearch: boolean = !input.includes(botPrefix);
+  const keywordSearch: boolean = !input.includes(`${botPrefix} `);
   const keyword = keywordSearch ? input.split(' ')[0].substring(botPrefixDefault.length) : undefined;
 
-  if (parameters.length) {
+  if ((!keywordSearch || keyword) && parameters.length) {
     const search: string = parameters.join(' ');
     const nsfw: boolean = (<TextChannel>message.channel).nsfw;
 
