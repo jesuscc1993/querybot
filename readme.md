@@ -12,7 +12,7 @@ Bot that brings search functionalities to [Discord](https://discordapp.com/) tha
 
 ## Technologies
 
-- [TypeScript](https://www.typescriptlang.org/) is used to write all code and then transpiled into [JavaScript](https://www.javascript.com/).
+- [TypeScript](https://www.typescriptlang.org/) is used to write robust code that is later transpiled into [JavaScript](https://www.javascript.com/).
 - [node.js](https://nodejs.org/) runs the application.
 - [Mongoose](https://mongoosejs.com/) acts as a middleware to handle data management with [MongoDB](https://www.mongodb.com/).
 - [discord.js](https://discord.js.org/#/) handles communication with the Discord API.
@@ -40,34 +40,20 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 ## Commands
 
-`!qb about`  
-Displays information about the bot.
+| Syntax                                   | Explanation                                                           | Example                     |
+| ---------------------------------------- | --------------------------------------------------------------------- | --------------------------- |
+| `!qb about`                              | Displays information about the bot.                                   |
+| `!qb help`<br/>`!qb ?`                   | Displays the bot's help.                                              |
+| `!qb list`<br/>`!qb ls`                  | Displays all available keywords.                                      |
+| `!qb set {keyword} {siteUrl}`            | Sets a site keyword.                                                  | _`!qb set yt youtube.com`_  |
+| `!qb unset {keyword}`                    | Unsets a site keyword.                                                | _`!qb unset yt`_            |
+| `!qb search {query}`<br/>`!qb s {query}` | Searches for the query on Google.                                     | _`!qb search discord bots`_ |
+| `!{keyword} {query}`                     | Searches for the query on the site registered for the passed keyword. | _`!yt GMM`_                 |
 
-`!qb help, !qb ?`  
-Displays the bot's help.
+## Links
 
-`!qb list, !qb ls`  
-Displays all available keywords.
-
-`!qb set {keyword} {siteUrl}`  
-Sets a site keyword.  
-_Example: `!qb set yt youtube.com`._
-
-`!qb unset {keyword}`  
-Unsets a site keyword.  
-_Example: `!qb unset yt`._
-
-`!qb search {query}, !qb s {query}`  
-Returns the first search result matching a query on any site.  
-_Example: `!qb search discord bots`._
-
-`!{keyword} {query}`  
-Returns the first search result matching a query on the site corresponding to a keyword.  
-_Example: `!yt GMM`._
-
-## Invite link
-
-[Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
+- [Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
+- [Issues and suggestions](https://github.com/jesuscc1993/querybot/issues)
 
 ## TODO
 
