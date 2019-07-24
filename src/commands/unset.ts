@@ -7,7 +7,7 @@ import { botPrefix } from '../settings';
 
 export const unsetSiteKeyword = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   if (parameters.length >= 1) {
-    if (!discordBot.hasPermission(message.member, 'ADMINISTRATOR')) {
+    if (!message.member.hasPermission('ADMINISTRATOR')) {
       discordBot.sendError(message, `\`\`${botPrefix} unset\`\` command is restricted to administrators.`);
       return;
     }

@@ -79,7 +79,7 @@ export class QueryBot {
   }
 
   private onGuildJoined(discordBot: DiscordBot, guild: Guild) {
-    const systemChannel: TextChannel = discordBot.getClient().channels.get(guild.systemChannelID) as TextChannel;
+    const systemChannel: TextChannel = guild.systemChannel as TextChannel;
     if (systemChannel) {
       systemChannel.send(
         `Thanks for inviting me.\nIf you need anything, you can see my commands by sending the message \`${botPrefix} help\`.`,

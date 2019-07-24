@@ -7,7 +7,7 @@ import { botPrefix } from '../settings';
 
 export const setSiteKeyword = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   if (parameters.length >= 2) {
-    if (!discordBot.hasPermission(message.member, 'ADMINISTRATOR')) {
+    if (!message.member.hasPermission('ADMINISTRATOR')) {
       discordBot.sendError(message, `\`\`${botPrefix} set\`\` command is restricted to administrators.`);
       return;
     }
