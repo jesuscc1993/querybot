@@ -13,10 +13,13 @@ export class MongooseDao implements IDao {
 
   public connect(databaseUrl: string, databaseName: string): Observable<undefined> {
     return new Observable(observer => {
-      mongoose.connect(`${databaseUrl}/${databaseName}`, { useNewUrlParser: true }).then(() => {
-        observer.next(undefined);
-        observer.complete();
-      }, observer.error);
+      mongoose.connect(`${databaseUrl}/${databaseName}`, { useNewUrlParser: true }).then(
+        () => {
+          observer.next(undefined);
+          observer.complete();
+        },
+        error => observer.error(error),
+      );
     });
   }
 
