@@ -57,4 +57,5 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 ## TODO
 
+- Replace DB with something less painful to use (firebase, maybe)
 - Enable to configure custom prefix by server
