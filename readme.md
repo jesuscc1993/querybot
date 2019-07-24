@@ -40,15 +40,15 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 ## Commands
 
-| Syntax                                   | Explanation                                                           | Example                     |
-| ---------------------------------------- | --------------------------------------------------------------------- | --------------------------- |
-| `!qb about`                              | Displays information about the bot.                                   |
-| `!qb help`<br/>`!qb ?`                   | Displays the bot's help.                                              |
-| `!qb list`<br/>`!qb ls`                  | Displays all available keywords.                                      |
-| `!qb set {keyword} {siteUrl}`            | Sets a site keyword.                                                  | _`!qb set yt youtube.com`_  |
-| `!qb unset {keyword}`                    | Unsets a site keyword.                                                | _`!qb unset yt`_            |
-| `!qb search {query}`<br/>`!qb s {query}` | Searches for the query on Google.                                     | _`!qb search discord bots`_ |
-| `!{keyword} {query}`                     | Searches for the query on the site registered for the passed keyword. | _`!yt GMM`_                 |
+| Syntax                                   | Explanation                                                              | Example                     |
+| ---------------------------------------- | ------------------------------------------------------------------------ | --------------------------- |
+| `!qb about`                              | Displays information about the bot.                                      |
+| `!qb help`<br/>`!qb ?`                   | Displays the bot's help.                                                 |
+| `!qb list`<br/>`!qb ls`                  | Displays all available keywords.                                         |
+| `!qb set {keyword} {siteUrl}`            | Sets a site keyword.                                                     | _`!qb set yt youtube.com`_  |
+| `!qb unset {keyword}`                    | Unsets a site keyword.                                                   | _`!qb unset yt`_            |
+| `!qb search {query}`<br/>`!qb s {query}` | Searches for the query on Google.                                        | _`!qb search discord bots`_ |
+| `!{keyword} {query}`                     | Searches for the query on the site<br>registered for the passed keyword. | _`!yt GMM`_                 |
 
 ## Links
 
