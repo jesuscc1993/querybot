@@ -1,11 +1,29 @@
-import { DiscordBot } from 'discord-bot';
+import { DiscordBot, DiscordBotCommandMetadata } from 'discord-bot';
 import { Message, TextChannel } from 'discord.js';
 
 import { outputError } from '../domain';
 import { GoogleSearchResultItem, ServerProvider } from '../providers';
 import { botPrefix, botPrefixDefault } from '../settings';
 
-export const query = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
+export const query = (
+  discordBot: DiscordBot,
+  message: Message,
+  input: string,
+  parameters: string[],
+  metadata: DiscordBotCommandMetadata,
+) => {
+  const commandCount = message.content
+    .split('\n')
+    .reduce((count, line) => count + (lineContainsPrefix(line, botPrefixDefault) ? 1 : 0), 0);
+
+  if (commandCount > 1) {
+    if (metadata.commandIndex === 0) {
+      discordBot.sendError(message, 'Search command is restricted to one usage per message.');
+    }
+
+    return;
+  }
+
   const keywordSearch: boolean = !input.includes(`${botPrefix} `);
   const keyword = keywordSearch ? input.split(' ')[0].substring(botPrefixDefault.length) : undefined;
 
@@ -41,6 +59,10 @@ export const query = (discordBot: DiscordBot, message: Message, input: string, p
   } else if (!keywordSearch) {
     discordBot.onWrongParameterCount(message);
   }
+};
+
+const lineContainsPrefix = (line: string, prefix: string): boolean => {
+  return line.indexOf(prefix) === 0 && line.substring(prefix.length + 1).charAt(0) !== ' ';
 };
 
 /*const getEmbedFromGoogleSearchResultItem = (discordBot: DiscordBot, searchResultItem: GoogleSearchResultItem): MessageOptions => {

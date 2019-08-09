@@ -237,8 +237,8 @@ diagnostics@^1.1.1:
     kuler "1.0.x"
 
 discord-bot@jesuscc1993/discord-bot#dist:
-  version "1.0.1"
-  resolved "https://codeload.github.com/jesuscc1993/discord-bot/tar.gz/597209583a889929655b4dd4d7ce9985d9ca7e2c"
+  version "1.0.3"
+  resolved "https://codeload.github.com/jesuscc1993/discord-bot/tar.gz/d5a294f3ca42d866916e467c9f84d41cca4ad4e9"
   dependencies:
     "@types/node" "^7.0.7"
     discord.js "^11.4.2"
