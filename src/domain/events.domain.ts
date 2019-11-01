@@ -5,7 +5,7 @@ export const setupEventHandlers = (logger: DiscordBotLogger) => {
   process.on('exit', (exitCode: number) => {
     logger.error(`Forced exit of code: ${exitCode}`);
   });
-  process.on('unhandledRejection', (reason: string, promise: Promise<any>) => {
+  process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
     unhandledRejections.set(promise, reason);
     logger.error(`Unhandled rejection: ${promise} ${reason}`);
   });
