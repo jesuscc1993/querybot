@@ -6,9 +6,9 @@ Bot that brings search functionalities to [Discord](https://discordapp.com/) tha
 
 ## Key Features
 
-- Keywords can be created and used to only search for results on certain websites.
-- Uses safe search on SFW channels and full search on NSFW channels.
-- Automatically leaves servers with > 25 members where over 75% of the member total is comprised of bots (configurable).
+- Global search.
+- Site search through the use of keywords.
+- Excludes NSFW results unless query is run of NSFW channels.
 
 ## Technologies
 
@@ -54,6 +54,16 @@ In order to generate a Discord authToken, follow [this tutorial](https://www.dig
 
 - [Invite QueryBot to your server](https://discordapp.com/oauth2/authorize?client_id=495279079868596225&scope=bot&permissions=18432)
 - [Issues and suggestions](https://github.com/jesuscc1993/querybot/issues)
+
+## Examples
+
+### Global search
+
+![](readme_assets/search-example.png)
+
+### Keyword search
+
+![](readme_assets/keyword-search-example.png)
 
 ## TODO
 
