@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "discord-bot": "jesuscc1993/discord-bot#dist",
-    "discord.js": "^11.5.1",
+    "discord.js": "discordjs/discord.js",
     "mongodb": "^3.3.2",
     "mongoose": "^5.7.7",
     "request": "^2.88.0",
@@ -23,12 +23,11 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@types/es6-shim": "^0.31.37",
-    "@types/mongoose": "^5.5.28",
     "@types/mongodb": "^3.3.8",
-    "@types/node": "10.1.2",
+    "@types/mongoose": "^5.5.28",
+    "@types/node": "^12.12.6",
     "@types/request": "^2.47.1",
-    "typescript": "^3.6.4"
+    "typescript": "^3.7.5"
   },
   "prettier": {
     "printWidth": 120,

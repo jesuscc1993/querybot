@@ -31,31 +31,34 @@ export const query = (
     const search: string = parameters.join(' ');
     const nsfw: boolean = (<TextChannel>message.channel).nsfw;
 
-    ServerProvider.getInstance()
-      .search(message.guild.id, search, nsfw, keyword)
-      .subscribe(
-        searchResultItems => {
-          if (!searchResultItems.length) {
-            discordBot.sendMessage(message, `No results found.`);
-          } else {
-            discordBot.sendMessage(message, `This is what I found:`);
+    const { guild } = message;
+    if (guild) {
+      ServerProvider.getInstance()
+        .search(guild.id, search, nsfw, keyword)
+        .subscribe(
+          searchResultItems => {
+            if (!searchResultItems.length) {
+              discordBot.sendMessage(message, `No results found.`);
+            } else {
+              discordBot.sendMessage(message, `This is what I found:`);
 
-            searchResultItems.forEach((searchResultItem: GoogleSearchResultItem) => {
-              discordBot.sendMessage(message, searchResultItem.link);
-              // discordBot.sendMessage(message, undefined, getEmbedFromGoogleSearchResultItem(discordBot, searchResultItem));
-            });
-          }
-        },
-        error => {
-          outputError(discordBot.logger, error, `ServerProvider.getInstance().search`, [
-            message.guild.id,
-            search,
-            nsfw,
-            keyword,
-          ]);
-          discordBot.sendError(message, error);
-        },
-      );
+              searchResultItems.forEach((searchResultItem: GoogleSearchResultItem) => {
+                discordBot.sendMessage(message, searchResultItem.link);
+                // discordBot.sendMessage(message, undefined, getEmbedFromGoogleSearchResultItem(discordBot, searchResultItem));
+              });
+            }
+          },
+          error => {
+            outputError(discordBot.logger, error, `ServerProvider.getInstance().search`, [
+              guild.id,
+              search,
+              nsfw,
+              keyword,
+            ]);
+            discordBot.sendError(message, error);
+          },
+        );
+    }
   } else if (!keywordSearch) {
     discordBot.onWrongParameterCount(message);
   }

@@ -1,4 +1,4 @@
-import { DiscordBot, DiscordBotLogger } from 'discord-bot';
+import { DiscordBot, DiscordBotCommandMetadata, DiscordBotLogger } from 'discord-bot';
 import { Guild, Message, TextChannel } from 'discord.js';
 import { Observable } from 'rxjs';
 
@@ -48,55 +48,81 @@ export class QueryBot {
   private initializeBot() {
     this.discordBot = new DiscordBot({
       botAuthToken,
+      botCommands: {
+        '?': this.mapCommand(displayHelp),
+        about: this.mapCommand(displayAbout),
+        default: this.mapCommand(query),
+        help: this.mapCommand(displayHelp),
+        list: this.mapCommand(listSites),
+        ls: this.mapCommand(listSites),
+        s: this.mapCommand(query),
+        search: this.mapCommand(query),
+        set: this.mapCommand(setSiteKeyword),
+        unset: this.mapCommand(unsetSiteKeyword),
+      },
       botPrefix,
       botPrefixDefault,
+      logger: this.logger,
       maximumGuildBotsPercentage,
       minimumGuildMembersForFarmCheck,
-      botCommands: {
-        '?': displayHelp.bind(this),
-        about: displayAbout.bind(this),
-        default: query.bind(this),
-        help: displayHelp.bind(this),
-        list: listSites.bind(this),
-        ls: listSites.bind(this),
-        s: query.bind(this),
-        search: query.bind(this),
-        set: setSiteKeyword.bind(this),
-        unset: unsetSiteKeyword.bind(this),
-      },
-      logger: this.logger,
-      onMention: this.onMention.bind(this),
       onGuildJoined: this.onGuildJoined.bind(this),
       onGuildLeft: this.onGuildLeft.bind(this),
+      onLoad: this.onLoad.bind(this),
+      onMention: this.onMention.bind(this),
     });
   }
 
-  private onMention(discordBot: DiscordBot, message: Message) {
-    discordBot.sendMessage(
+  private mapCommand(
+    command: (
+      discordBot: DiscordBot,
+      message: Message,
+      input: string,
+      parameters: string[],
+      metadata: DiscordBotCommandMetadata,
+    ) => void,
+  ) {
+    return (message: Message, input: string, parameters: string[], metadata: DiscordBotCommandMetadata) => {
+      command(this.discordBot, message, input, parameters, metadata);
+    };
+  }
+
+  private onLoad() {
+    this.setActivityMessage();
+  }
+
+  private onMention(message: Message) {
+    this.discordBot.sendMessage(
       message,
       `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix} help\`.`,
     );
   }
 
-  private onGuildJoined(discordBot: DiscordBot, guild: Guild) {
+  private onGuildJoined(guild: Guild) {
     const systemChannel: TextChannel = guild.systemChannel as TextChannel;
     if (systemChannel) {
       systemChannel.send(
         `Thanks for inviting me.\nIf you need anything, you can see my commands by sending the message \`${botPrefix} help\`.`,
       );
     }
+    this.setActivityMessage();
   }
 
-  private onGuildLeft(discordBot: DiscordBot, guild: Guild) {
+  private onGuildLeft(guild: Guild) {
     this.serverProvider.deleteServerById(guild.id).subscribe(
       () => {
         this.logger.info(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
       },
       error => this.onError(error, `onGuildLeft`),
     );
+    this.setActivityMessage();
   }
 
   private onError(error: Error | string, functionName: string) {
     outputError(this.logger, error, `${this.className}.${functionName}`);
+  }
+
+  private setActivityMessage() {
+    const activityMessage = `${botPrefix} help | ${this.discordBot.getClient().guilds.size} servers`;
+    this.discordBot.setActivityMessage(activityMessage, { type: 'LISTENING' });
   }
 }
