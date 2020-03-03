@@ -1,8 +1,10 @@
 import { DiscordBotLogger } from 'discord-bot';
-import mongoose from 'mongoose';
+import mongoose, { ConnectionOptions } from 'mongoose';
 import { Observable } from 'rxjs';
 
 import { IDao } from '../dao.types';
+
+const connectionOptions: ConnectionOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 
 export class MongooseDao implements IDao {
   protected logger?: DiscordBotLogger;
@@ -13,7 +15,7 @@ export class MongooseDao implements IDao {
 
   public connect(databaseUrl: string, databaseName: string): Observable<undefined> {
     return new Observable(observer => {
-      mongoose.connect(`${databaseUrl}/${databaseName}`, { useNewUrlParser: true }).then(
+      mongoose.connect(`${databaseUrl}/${databaseName}`, connectionOptions).then(
         () => {
           observer.next(undefined);
           observer.complete();

@@ -61,9 +61,9 @@
   integrity sha512-SCcK7mvGi3+ZNz833RRjFIxrn4gI1PPR3NtuIS+6vMkvmsGjosqTJwRt5bAEFLRz+wtJMWv8+uOnZf2hi2QXTg==
 
 "@types/ws@^7.2.1":
-  version "7.2.1"
-  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.2.1.tgz#b800f2b8aee694e2b581113643e20d79dd3b8556"
-  integrity sha512-UEmRNbXFGvfs/sLncf01GuVv6U1mZP3Df0iXWx4kUlikJxbFyFADp95mDn1XDTE2mXpzzoHcKlfFcbytLq4vaA==
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.2.2.tgz#1bd2038bc80aea60f8a20b2dcf08602a72e65063"
+  integrity sha512-oqnI3DbGCVI9zJ/WHdFo3CUE8jQ8CVQDUIKaDtlTcNeT4zs6UCg9Gvk5QrFx2QPkRszpM6yc8o0p4aGjCsTi+w==
   dependencies:
     "@types/node" "*"
 
@@ -232,8 +232,8 @@ diagnostics@^1.1.1:
     kuler "1.0.x"
 
 discord-bot@jesuscc1993/discord-bot#dist:
-  version "1.0.5"
-  resolved "https://codeload.github.com/jesuscc1993/discord-bot/tar.gz/dede66199f14a47966fb4df28a3fdcb250992a8b"
+  version "1.0.6"
+  resolved "https://codeload.github.com/jesuscc1993/discord-bot/tar.gz/772ff2befeb4db47e4ea7aa1eacf49c1a22dc235"
   dependencies:
     "@types/ws" "^7.2.1"
     discord.js discordjs/discord.js
