@@ -1,16 +1,20 @@
 import { DiscordBotLogger } from 'discord-bot/dist/discord-bot.types';
-import winston from 'winston';
+import winston, { format } from 'winston';
 
-import { setupEventHandlers } from './domain';
+import { getDate, setupEventHandlers } from './domain';
 import { QueryBot } from './modules/core';
 import { logLevel, logPath } from './settings';
 
 const logger: DiscordBotLogger = <DiscordBotLogger>winston.createLogger({
-  format: winston.format.simple(),
+  format: format.combine(
+    format.label({ label: '[my-label]' }),
+    format.timestamp({ format: 'HH:mm:ss' }),
+    format.printf(info => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`),
+  ),
   level: logLevel,
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: `${logPath}/querybot-${new Date().toISOString().split('T')[0]}.log` }),
+    new winston.transports.File({ filename: `${logPath}/querybot-${getDate()}.log` }),
   ],
 });
 

@@ -87,6 +87,9 @@ export class QueryBot {
   }
 
   private onLoad() {
+    this.logger.info(
+      `${this.className}: Currently running on ${this.discordBot.getClient().guilds.cache.size} servers`,
+    );
     this.setActivityMessage();
   }
 
@@ -122,7 +125,7 @@ export class QueryBot {
   }
 
   private setActivityMessage() {
-    const activityMessage = `${botPrefix} help | ${this.discordBot.getClient().guilds.size} servers`;
+    const activityMessage = `${botPrefix} help | ${this.discordBot.getClient().guilds.cache.size} servers`;
     this.discordBot.setActivityMessage(activityMessage, { type: 'LISTENING' });
   }
 }
