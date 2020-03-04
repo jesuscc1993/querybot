@@ -1,5 +1,7 @@
 import { DiscordBot } from 'discord-bot';
 import { Message } from 'discord.js';
+import { of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 import { outputError } from '../domain';
 import { ServerProvider } from '../providers';
@@ -17,15 +19,16 @@ export const unsetSiteKeyword = (discordBot: DiscordBot, message: Message, input
       const keyword: string = parameters[0];
       ServerProvider.getInstance()
         .unsetSiteKeyword(guild.id, keyword)
-        .subscribe(
-          () => {
+        .pipe(
+          tap(() => {
             discordBot.sendMessage(message, `Successfully unset keyword "${keyword}".`);
-          },
-          error => {
+          }),
+          catchError(error => {
             outputError(discordBot.logger, error, `ServerProvider.getInstance().unsetSiteKeyword`, [guild.id, keyword]);
-            discordBot.sendError(message, error);
-          },
-        );
+            return of(discordBot.sendError(message, error));
+          }),
+        )
+        .subscribe();
     }
   } else {
     discordBot.onWrongParameterCount(message);

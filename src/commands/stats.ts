@@ -1,8 +1,8 @@
 import { DiscordBot } from 'discord-bot';
 import { Message } from 'discord.js';
 
-import { botColor } from '../settings';
 import { getDateTime } from '../domain';
+import { botColor } from '../settings';
 
 export const displayStats = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   const client = discordBot.getClient();
