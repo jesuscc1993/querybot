@@ -5,4 +5,6 @@ logs/*
 !logs/.gitkeep
 build
 node_modules
-src/settings/settings.ts
+src/settings
+!src/settings/index.ts
+!src/settings/settings.example.ts
