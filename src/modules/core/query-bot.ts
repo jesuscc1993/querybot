@@ -1,6 +1,7 @@
 import { DiscordBot, DiscordBotCommandMetadata, DiscordBotLogger } from 'discord-bot';
 import { Guild, Message, TextChannel } from 'discord.js';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 
 import { displayAbout, displayHelp, listSites, query, setSiteKeyword, unsetSiteKeyword } from '../../commands';
 import { outputError } from '../../domain';
@@ -16,6 +17,7 @@ import {
   maximumGuildBotsPercentage,
   minimumGuildMembersForFarmCheck,
 } from '../../settings';
+import { displayStats } from '../../commands/stats';
 
 export class QueryBot {
   private className: string;
@@ -32,13 +34,17 @@ export class QueryBot {
     this.serverProvider = ServerProvider.getInstance();
     this.serverProvider.configure(googleSearchApiKey, googleSearchCx);
 
-    this.initializeDatabase().subscribe(
-      () => {
-        this.logger.info(`${this.className}: Database connection successfully established`);
-        this.initializeBot();
-      },
-      error => this.onError(error, `initializeDatabase`),
-    );
+    this.initializeDatabase()
+      .pipe(
+        tap(() => {
+          this.initializeBot();
+          this.logger.info(`${this.className}: Database connection successfully established`);
+        }),
+        catchError(error => {
+          return of(this.onError(error, `initializeDatabase`));
+        }),
+      )
+      .subscribe();
   }
 
   private initializeDatabase(): Observable<undefined> {
@@ -58,6 +64,7 @@ export class QueryBot {
         s: this.mapCommand(query),
         search: this.mapCommand(query),
         set: this.mapCommand(setSiteKeyword),
+        stats: this.mapCommand(displayStats),
         unset: this.mapCommand(unsetSiteKeyword),
       },
       botPrefix,
@@ -87,10 +94,8 @@ export class QueryBot {
   }
 
   private onLoad() {
-    this.logger.info(
-      `${this.className}: Currently running on ${this.discordBot.getClient().guilds.cache.size} servers`,
-    );
-    this.setActivityMessage();
+    this.discordBot.setActivityMessage(`${botPrefix} help`, { type: 'LISTENING' });
+    this.logGuildCount();
   }
 
   private onMention(message: Message) {
@@ -107,25 +112,30 @@ export class QueryBot {
         `Thanks for inviting me.\nIf you need anything, you can see my commands by sending the message \`${botPrefix} help\`.`,
       );
     }
-    this.setActivityMessage();
+    this.logGuildCount();
   }
 
   private onGuildLeft(guild: Guild) {
-    this.serverProvider.deleteServerById(guild.id).subscribe(
-      () => {
-        this.logger.info(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
-      },
-      error => this.onError(error, `onGuildLeft`),
-    );
-    this.setActivityMessage();
+    this.serverProvider
+      .deleteServerById(guild.id)
+      .pipe(
+        tap(() => {
+          this.logger.info(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
+        }),
+        catchError(error => {
+          return of(this.onError(error, `onGuildLeft`));
+        }),
+      )
+      .subscribe();
+    this.logGuildCount();
+  }
+
+  private logGuildCount() {
+    const guildCount = this.discordBot.getClient().guilds.cache.size;
+    this.logger.info(`${this.className}: Currently running on ${guildCount} servers`);
   }
 
   private onError(error: Error | string, functionName: string) {
     outputError(this.logger, error, `${this.className}.${functionName}`);
-  }
-
-  private setActivityMessage() {
-    const activityMessage = `${botPrefix} help | ${this.discordBot.getClient().guilds.cache.size} servers`;
-    this.discordBot.setActivityMessage(activityMessage, { type: 'LISTENING' });
   }
 }
