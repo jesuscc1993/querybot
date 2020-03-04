@@ -30,6 +30,9 @@ export const displayHelp = (discordBot: DiscordBot, message: Message, input: str
       **\`${botPrefixDefault}{keyword} {query}\`**
       Returns the first search result matching a query on the site corresponding to a keyword. Example: \`${botPrefixDefault}yt GMM\`.
       
+      **\`${botPrefix} stats\`**
+      Displays bot statistics.
+      
       **# Issues and suggestions:**      
       Got an issue or suggestion? You can report them here:
       [github.com](https://github.com/jesuscc1993/querybot/issues)
