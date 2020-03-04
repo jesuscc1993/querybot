@@ -37,10 +37,14 @@ export const query = (
         .search(guild.id, search, nsfw, keyword)
         .subscribe(
           searchResultItems => {
+            const messageText = `This is what I found:`;
+
             if (!searchResultItems.length) {
               discordBot.sendMessage(message, `No results found.`);
+            } else if (searchResultItems.length === 1) {
+              discordBot.sendMessage(message, `${messageText}\n${searchResultItems[0].link}`);
             } else {
-              discordBot.sendMessage(message, `This is what I found:`);
+              discordBot.sendMessage(message, `${messageText}`);
 
               searchResultItems.forEach((searchResultItem: GoogleSearchResultItem) => {
                 discordBot.sendMessage(message, searchResultItem.link);
