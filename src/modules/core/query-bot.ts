@@ -1,6 +1,7 @@
 import { DiscordBot, DiscordBotCommandMetadata, DiscordBotLogger } from 'discord-bot';
 import { Guild, Message, TextChannel } from 'discord.js';
-import { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 import { displayAbout, displayHelp, listSites, query, setSiteKeyword, unsetSiteKeyword } from '../../commands';
 import { outputError } from '../../domain';
@@ -30,19 +31,19 @@ export class QueryBot {
     this.logger = logger;
 
     this.serverProvider = ServerProvider.getInstance();
-    this.serverProvider.configure(googleSearchApiKey, googleSearchCx);
-
-    this.initializeDatabase().subscribe(
-      () => {
-        this.logger.info(`${this.className}: Database connection successfully established`);
-        this.initializeBot();
-      },
-      error => this.onError(error, `initializeDatabase`),
-    );
-  }
-
-  private initializeDatabase(): Observable<undefined> {
-    return this.serverProvider.connect(databaseUrl, databaseName);
+    this.serverProvider
+      .configure(googleSearchApiKey, googleSearchCx)
+      .connect(databaseUrl, databaseName)
+      .pipe(
+        tap(
+          () => {
+            this.logger.info(`${this.className}: Database connection successfully established`);
+            this.initializeBot();
+          },
+          catchError(error => of(this.onError(error, `initializeDatabase`))),
+        ),
+      )
+      .subscribe();
   }
 
   private initializeBot() {

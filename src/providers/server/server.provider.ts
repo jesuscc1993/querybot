@@ -1,23 +1,20 @@
-import { DiscordBotLogger } from 'discord-bot';
-import mongoose, { Document, Model } from 'mongoose';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { flatMap, map, tap } from 'rxjs/operators';
 
-import { DocumentDao } from '../../persistence/document.dao';
+import { ServerDao } from '../../persistence/server.dao';
 import { defaultSiteKeywordsMap } from '../../settings';
 import { GoogleSearchProvider } from '../google-search/google-search.provider';
 import { GoogleSearchOptions, GoogleSearchResultItem } from '../google-search/google-search.types';
-import { getServerKeywordsMap, getServerSchema } from './server.domain';
-import { KeywordsMap, Server, SiteKeyword } from './server.types';
+import { KeywordsMap, ServerModel } from './server.types';
 
 export class ServerProvider {
-  readonly serverDocument: Model<any>;
-  readonly documentDao: DocumentDao;
+  readonly serverDao: ServerDao;
 
   readonly googleSearchProvider: GoogleSearchProvider;
 
-  readonly serverSiteKeywordsMap: { [serverID: string]: KeywordsMap };
-
   protected static _instance: ServerProvider = new ServerProvider();
+
+  private serverSiteKeywordsMap: { [serverID: string]: KeywordsMap };
   private searchOptions: GoogleSearchOptions;
 
   constructor() {
@@ -26,8 +23,7 @@ export class ServerProvider {
     }
     ServerProvider._instance = this;
 
-    this.serverDocument = mongoose.model('Server', getServerSchema());
-    this.documentDao = new DocumentDao();
+    this.serverDao = new ServerDao();
 
     this.googleSearchProvider = new GoogleSearchProvider();
 
@@ -38,108 +34,56 @@ export class ServerProvider {
     return ServerProvider._instance;
   }
 
-  public configure(googleSearchApiKey: string, googleSearchCx: string, logger?: DiscordBotLogger) {
-    this.documentDao.configure(logger);
-    this.searchOptions = {
-      cx: googleSearchCx,
-      key: googleSearchApiKey,
-    };
+  public configure(googleSearchApiKey: string, googleSearchCx: string) {
+    this.searchOptions = { cx: googleSearchCx, key: googleSearchApiKey };
+    return this;
   }
 
-  public connect(databaseUrl: string, databaseName: string): Observable<undefined> {
-    return this.documentDao.connect(databaseUrl, databaseName);
+  public connect(databaseUrl: string, databaseName: string) {
+    return this.serverDao.connect(databaseUrl, databaseName);
   }
 
-  public setSiteKeyword(serverId: string, keyword: string, url: string): Observable<undefined> {
-    return new Observable(observer => {
-      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe(keywordsMap => {
-        this.serverSiteKeywordsMap[serverId][keyword] = url;
-
-        this.saveOrUpdateServer({
-          _id: serverId,
-          keywordsMap: this.serverSiteKeywordsMap[serverId],
-        }).subscribe(
-          server => {
-            observer.next();
-            observer.complete();
-          },
-          error => observer.error(error),
-        );
-      });
+  public setSiteKeyword(serverId: string, keyword: string, url: string) {
+    return this.saveOrUpdateServer({
+      _id: serverId,
+      keywordsMap: { ...(this.serverSiteKeywordsMap[serverId] || defaultSiteKeywordsMap), [keyword]: url },
     });
   }
 
-  public unsetSiteKeyword(serverId: string, keyword: string): Observable<undefined> {
-    return new Observable(observer => {
-      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe(keywordsMap => {
-        if (!this.serverSiteKeywordsMap[serverId][keyword]) {
-          observer.error(new Error(`Keyword "${keyword}" does not exist.`));
+  public unsetSiteKeyword(serverId: string, keyword: string) {
+    return this.getServerSiteKeywordsMapOrSetDefaults(serverId).pipe(
+      flatMap(keywordsMap => {
+        if (!keywordsMap[keyword]) {
+          throw new Error(`Keyword "${keyword}" does not exist.`);
         }
 
-        delete this.serverSiteKeywordsMap[serverId][keyword];
+        delete keywordsMap[keyword];
 
-        this.saveOrUpdateServer({
+        return this.saveOrUpdateServer({
           _id: serverId,
-          keywordsMap: this.serverSiteKeywordsMap[serverId],
-        }).subscribe(
-          server => {
-            observer.next();
-            observer.complete();
-          },
-          error => observer.error(error),
-        );
-      });
-    });
+          keywordsMap: keywordsMap,
+        });
+      }),
+    );
   }
 
-  public getSiteKeyword(serverId: string, keyword: string): Observable<string> {
-    return new Observable(observer => {
-      const onCompletion = (keyword: string) => {
-        observer.next(keyword);
-        observer.complete();
-      };
-
-      if (this.serverSiteKeywordsMap[serverId]) {
-        onCompletion(this.serverSiteKeywordsMap[serverId][keyword]);
-      } else {
-        this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe(
-          keywordsMap => {
-            onCompletion(keywordsMap[keyword]);
-          },
-          error => observer.error(error),
-        );
-      }
-    });
+  public getSiteKeyword(serverId: string, keyword: string) {
+    return (this.serverSiteKeywordsMap[serverId]
+      ? of(this.serverSiteKeywordsMap[serverId])
+      : this.getServerSiteKeywordsMapOrSetDefaults(serverId)
+    ).pipe(map(keywordsMap => keywordsMap[keyword]));
   }
 
-  public getServerSiteKeywords(serverId: string): Observable<SiteKeyword[]> {
-    return new Observable(observer => {
-      this.getServerSiteKeywordsMapOrSetDefaults(serverId).subscribe(
-        keywordsMap => {
-          this.serverSiteKeywordsMap[serverId] = keywordsMap;
-
-          const siteKeywords: SiteKeyword[] = [];
-          if (keywordsMap) {
-            Object.keys(keywordsMap).forEach(keyword =>
-              siteKeywords.push({ keyword: keyword, url: keywordsMap[keyword] }),
-            );
-          }
-
-          observer.next(siteKeywords);
-          observer.complete();
-        },
-        error => observer.error(error),
-      );
-    });
+  public getServerSiteKeywords(serverId: string) {
+    return this.getServerSiteKeywordsMapOrSetDefaults(serverId).pipe(map(this.siteMapToArray));
   }
 
-  public search(
-    serverId: string,
-    query: string,
-    nsfw: boolean,
-    keyword?: string,
-  ): Observable<GoogleSearchResultItem[]> {
-    return new Observable(observer => {
+  private siteMapToArray = (keywordsMap: KeywordsMap) => {
+    return Object.keys(keywordsMap).map(keyword => ({ keyword: keyword, url: keywordsMap[keyword] }));
+  };
+
+  public search(serverId: string, query: string, nsfw: boolean, keyword?: string) {
+    return new Observable<GoogleSearchResultItem[]>(observer => {
       let searchOptions: GoogleSearchOptions = Object.assign(
         { num: 1, safe: nsfw ? 'off' : 'active' },
         this.searchOptions,
@@ -174,73 +118,38 @@ export class ServerProvider {
     });
   }
 
-  private getServerSiteKeywordsMapOrSetDefaults(serverId: string): Observable<any> {
-    return new Observable(observer => {
-      const onCompletion = (server: Server) => {
-        const keywordsMap: any = getServerKeywordsMap(server);
+  public saveServer(server: ServerModel) {
+    return this.serverDao.create(server).pipe(tap(this.updateKeywordsFromServer));
+  }
+  public updateServer(server: ServerModel) {
+    return this.serverDao.update(server).pipe(tap(this.updateKeywordsFromServer));
+  }
+  public saveOrUpdateServer(server: ServerModel) {
+    return this.serverDao.createOrUpdate(server).pipe(tap(this.updateKeywordsFromServer));
+  }
+  public deleteServerById(serverId: string) {
+    return this.serverDao.deleteById(serverId).pipe(tap(_ => delete this.serverSiteKeywordsMap[serverId]));
+  }
+  public findServerById(serverId: string): Observable<ServerModel | undefined> {
+    return this.serverDao.findById(serverId);
+  }
+
+  private updateKeywordsFromServer(server: ServerModel) {
+    this.serverSiteKeywordsMap = {
+      ...this.serverSiteKeywordsMap,
+      [server._id]: server.keywordsMap,
+    };
+  }
+
+  private getServerSiteKeywordsMapOrSetDefaults(serverId: string) {
+    return this.serverDao.findById(serverId).pipe(
+      flatMap(server =>
+        server ? of(server) : this.saveServer({ _id: serverId, keywordsMap: { ...defaultSiteKeywordsMap } }),
+      ),
+      map(({ keywordsMap }) => keywordsMap),
+      tap(keywordsMap => {
         this.serverSiteKeywordsMap[serverId] = keywordsMap;
-        observer.next(keywordsMap);
-        observer.complete();
-      };
-
-      this.findServerById(serverId).subscribe(
-        returnedServer => {
-          if (returnedServer) {
-            onCompletion(returnedServer);
-          } else {
-            this.saveServer({
-              _id: serverId,
-              keywordsMap: defaultSiteKeywordsMap,
-            }).subscribe(
-              savedServer => {
-                onCompletion(savedServer);
-              },
-              error => observer.error(error),
-            );
-          }
-        },
-        error => observer.error(error),
-      );
-    });
-  }
-
-  public saveServer(server: Server): Observable<any> {
-    return this.documentDao.saveDocument(this.serverToDocument(server));
-  }
-
-  public updateServer(server: Server): Observable<any> {
-    return this.documentDao.updateDocument(this.serverDocument, { _id: server._id }, this.serverToDocument(server));
-  }
-
-  public saveOrUpdateServer(server: Server): Observable<any> {
-    return this.documentDao.saveOrUpdateDocument(
-      this.serverDocument,
-      { _id: server._id },
-      this.serverToDocument(server),
+      }),
     );
-  }
-
-  public deleteServerById(serverId: string): Observable<any> {
-    const server: Server = { _id: serverId };
-    return this.documentDao.deleteDocument(this.serverDocument, { _id: serverId }, this.serverToDocument(server));
-  }
-
-  public findServerById(serverId: string): Observable<Server | undefined> {
-    return new Observable(observer => {
-      this.documentDao.findDocuments(this.serverDocument, { _id: serverId }).subscribe(
-        servers => {
-          observer.next(servers.length ? servers[0] : undefined);
-          observer.complete();
-        },
-        error => observer.error(error),
-      );
-    });
-  }
-
-  private serverToDocument(server: Server): Document {
-    return new this.serverDocument({
-      _id: server._id,
-      keywordsMap: server.keywordsMap,
-    });
   }
 }

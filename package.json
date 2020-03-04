@@ -9,7 +9,7 @@
   "main": "build/app.js",
   "scripts": {
     "build": "tsc",
-    "lint": "tsc --noEmit > logs/tslint.log",
+    "lint": "tsc --noEmit",
     "serve": "node build/app.js",
     "start": "tsc && npm run serve"
   },
@@ -17,7 +17,7 @@
     "discord-bot": "jesuscc1993/discord-bot#dist",
     "discord.js": "^12.0.1",
     "mongodb": "^3.3.2",
-    "mongoose": "^5.7.7",
+    "mongoose": "^5.9.3",
     "request": "^2.88.0",
     "rxjs": "^6.5.3",
     "winston": "^3.2.1"
