@@ -1,9 +1,17 @@
 import { DiscordBot, DiscordBotCommandMetadata, DiscordBotLogger } from 'discord-bot';
 import { Guild, Message, TextChannel } from 'discord.js';
 import { Observable, of } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 
-import { displayAbout, displayHelp, listSites, query, setSiteKeyword, unsetSiteKeyword } from '../../commands';
+import {
+  displayAbout,
+  displayHelp,
+  displayStats,
+  listSites,
+  query,
+  setSiteKeyword,
+  unsetSiteKeyword,
+} from '../../commands';
 import { outputError } from '../../domain';
 import { ServerProvider } from '../../providers';
 import {
@@ -17,7 +25,6 @@ import {
   maximumGuildBotsPercentage,
   minimumGuildMembersForFarmCheck,
 } from '../../settings';
-import { displayStats } from '../../commands/stats';
 
 export class QueryBot {
   private className: string;
@@ -32,23 +39,19 @@ export class QueryBot {
     this.logger = logger;
 
     this.serverProvider = ServerProvider.getInstance();
-    this.serverProvider.configure(googleSearchApiKey, googleSearchCx);
-
-    this.initializeDatabase()
+    this.serverProvider
+      .configure(googleSearchApiKey, googleSearchCx)
+      .connect(databaseUrl, databaseName)
       .pipe(
         tap(() => {
           this.initializeBot();
           this.logger.info(`${this.className}: Database connection successfully established`);
         }),
         catchError(error => {
-          return of(this.onError(error, `initializeDatabase`));
+          return of(this.onError(error, `constructor`));
         }),
       )
       .subscribe();
-  }
-
-  private initializeDatabase(): Observable<undefined> {
-    return this.serverProvider.connect(databaseUrl, databaseName);
   }
 
   private initializeBot() {

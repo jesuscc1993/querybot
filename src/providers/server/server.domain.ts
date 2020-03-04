@@ -1,11 +1,10 @@
 import { Schema } from 'mongoose';
 
-import { Server } from './server.types';
+import { ServerModel } from './server.types';
 
-export const getServerKeywordsMap = (server: Server) => (server ? server.keywordsMap : undefined);
-
-export const getServerSite = (server: Server, keyword: string) =>
-  server && server.keywordsMap ? server.keywordsMap[keyword] : undefined;
+export const getServerSite = (server: ServerModel, keyword: string) => {
+  return server.keywordsMap[keyword] || undefined;
+};
 
 export const getServerSchema = () =>
   new Schema(

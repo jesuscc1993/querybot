@@ -1,13 +1,17 @@
 import request, { Response } from 'request';
 import { Observable } from 'rxjs';
 
-import { GoogleSearchOptions, GoogleSearchResult, GoogleSearchResultItem } from './google-search.types';
+import {
+  GoogleSearchOptions,
+  GoogleSearchResult,
+  GoogleSearchResultItem,
+} from './google-search.types';
 
 export class GoogleSearchProvider {
   private session = request.defaults({ jar: true });
 
-  public search(query: string, options: GoogleSearchOptions): Observable<GoogleSearchResultItem[]> {
-    return new Observable<any>(observer => {
+  public search(query: string, options: GoogleSearchOptions) {
+    return new Observable<GoogleSearchResultItem[]>(observer => {
       let searchUri: string = `https://www.googleapis.com/customsearch/v1?q=${query}`;
       for (const key in options) {
         searchUri += `&${key}=${options[key]}`;

@@ -1,5 +1,7 @@
 import { DiscordBot, DiscordBotCommandMetadata } from 'discord-bot';
 import { Message, TextChannel } from 'discord.js';
+import { of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 import { outputError } from '../domain';
 import { GoogleSearchResultItem, ServerProvider } from '../providers';
@@ -35,8 +37,8 @@ export const query = (
     if (guild) {
       ServerProvider.getInstance()
         .search(guild.id, search, nsfw, keyword)
-        .subscribe(
-          searchResultItems => {
+        .pipe(
+          tap(searchResultItems => {
             const messageText = `This is what I found:`;
 
             if (!searchResultItems.length) {
@@ -51,17 +53,18 @@ export const query = (
                 // discordBot.sendMessage(message, undefined, getEmbedFromGoogleSearchResultItem(discordBot, searchResultItem));
               });
             }
-          },
-          error => {
+          }),
+          catchError(error => {
             outputError(discordBot.logger, error, `ServerProvider.getInstance().search`, [
               guild.id,
               search,
               nsfw,
               keyword,
             ]);
-            discordBot.sendError(message, error);
-          },
-        );
+            return of(discordBot.sendError(message, error));
+          }),
+        )
+        .subscribe();
     }
   } else if (!keywordSearch) {
     discordBot.onWrongParameterCount(message);

@@ -1,16 +1,10 @@
-export type Schema = {
-  _id: string;
-  updated: {
-    type: string;
-    default: string;
-  };
-};
+import { DocumentSchema } from '../../persistence/dao.types';
 
 export type KeywordsMap = { [keyword: string]: string };
 
-export type Server = {
-  keywordsMap?: KeywordsMap;
-} & Partial<Schema>;
+export type ServerModel = DocumentSchema<{
+  keywordsMap: KeywordsMap;
+}>;
 
 export type SiteKeyword = {
   keyword: string;

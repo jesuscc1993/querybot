@@ -1,5 +1,7 @@
 import { DiscordBot } from 'discord-bot';
 import { Message } from 'discord.js';
+import { of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 import { outputError } from '../domain';
 import { ServerProvider } from '../providers';
@@ -18,19 +20,20 @@ export const setSiteKeyword = (discordBot: DiscordBot, message: Message, input: 
       const site: string = parameters[1];
       ServerProvider.getInstance()
         .setSiteKeyword(guild.id, keyword, site)
-        .subscribe(
-          () => {
+        .pipe(
+          tap(() => {
             discordBot.sendMessage(message, `Successfully set site "${site}" to keyword "${keyword}".`);
-          },
-          error => {
+          }),
+          catchError(error => {
             outputError(discordBot.logger, error, `ServerProvider.getInstance().setSiteKeyword`, [
               guild.id,
               keyword,
               site,
             ]);
-            discordBot.sendError(message, error);
-          },
-        );
+            return of(discordBot.sendError(message, error));
+          }),
+        )
+        .subscribe();
     }
   } else {
     discordBot.onWrongParameterCount(message);

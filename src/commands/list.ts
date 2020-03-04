@@ -1,5 +1,7 @@
 import { DiscordBot } from 'discord-bot';
 import { Message } from 'discord.js';
+import { of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 
 import { outputError } from '../domain';
 import { ServerProvider } from '../providers';
@@ -10,8 +12,8 @@ export const listSites = (discordBot: DiscordBot, message: Message, input: strin
   if (guild) {
     ServerProvider.getInstance()
       .getServerSiteKeywords(guild.id)
-      .subscribe(
-        siteKeywords => {
+      .pipe(
+        tap(siteKeywords => {
           if (siteKeywords.length) {
             let list: string = '';
             siteKeywords
@@ -34,11 +36,12 @@ export const listSites = (discordBot: DiscordBot, message: Message, input: strin
               `No keywords available. Use command \`${botPrefix} help\` to see how to add one.`,
             );
           }
-        },
-        error => {
+        }),
+        catchError(error => {
           outputError(discordBot.logger, error, `ServerProvider.getInstance().getServerSiteKeywords`, [guild.id]);
-          discordBot.sendError(message, error);
-        },
-      );
+          return of(discordBot.sendError(message, error));
+        }),
+      )
+      .subscribe();
   }
 };
