@@ -5,6 +5,7 @@
     "mongodb": "^3.3.2",
     "mongoose": "^5.9.3",
     "request": "^2.88.0",
+    "rimraf": "^3.0.2",
     "rxjs": "^6.5.3",
     "winston": "^3.2.1"
   },
@@ -30,7 +31,7 @@
     "url": "https://github.com/jesuscc1993/querybot"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf build && tsc",
     "lint": "tsc --noEmit",
     "serve": "node build/app.js",
     "start": "yarn build && yarn serve"
