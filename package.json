@@ -2,11 +2,12 @@
   "dependencies": {
     "discord-bot": "jesuscc1993/discord-bot#dist",
     "discord.js": "^12.0.1",
+    "dotenv": "^8.2.0",
     "mongodb": "^3.3.2",
     "mongoose": "^5.9.3",
     "request": "^2.88.0",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.5.3",
+    "rxjs": "^6.5.4",
     "winston": "^3.2.1"
   },
   "description": "Provides web search functionalities with custom scopes",
@@ -32,6 +33,7 @@
   },
   "scripts": {
     "build": "rimraf build && tsc",
+    "clean": "yarn build",
     "lint": "tsc --noEmit",
     "serve": "node build/app.js",
     "start": "yarn build && yarn serve"

@@ -1,10 +1,12 @@
-.idea
+# ignore
+.env
 .history
-npm-debug.log
-logs/*
-!logs/.gitkeep
+.idea
 build
+env
+logs/*
 node_modules
-src/settings
-!src/settings/index.ts
-!src/settings/settings.example.ts
+npm-debug.log
+
+# keep
+!logs/.gitkeep
