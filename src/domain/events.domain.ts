@@ -14,7 +14,7 @@ export const setupEventHandlers = (logger: DiscordBotLogger) => {
     logger.error(`Rejection handled: ${promise}`);
   });
   process.on('uncaughtException', (error: Error) => {
-    logger.error(`Caught exception: ${error}`);
+    logger.error(`Uncaught exception: ${error}`);
   });
   process.on('warning', (warning: any) => {
     logger.error(`Process warning: ${warning.name}\nMessage: ${warning.message}\nStack trace:\n${warning.trace}`);
