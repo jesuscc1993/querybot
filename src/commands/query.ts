@@ -4,7 +4,11 @@ import { of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 import { outputError } from '../domain';
-import { GoogleSearchResultItem, ServerProvider } from '../providers';
+import {
+  GoogleSearchResultItem,
+  invalidKeywordError,
+  ServerProvider,
+} from '../providers';
 import { botPrefix, botPrefixDefault } from '../settings';
 
 export const query = (
@@ -55,6 +59,8 @@ export const query = (
             }
           }),
           catchError(error => {
+            if (error === invalidKeywordError) return of();
+
             outputError(discordBot.logger, error, `ServerProvider.getInstance().search`, [
               guild.id,
               search,

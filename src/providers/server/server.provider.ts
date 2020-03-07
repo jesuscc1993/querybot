@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { flatMap, map, tap } from 'rxjs/operators';
 
 import { ServerDao } from '../../persistence/server.dao';
@@ -90,13 +90,12 @@ export class ServerProvider {
 
     return (keyword
       ? this.getSiteKeyword(serverId, keyword).pipe(
-          tap(site => {
+          flatMap(site => {
             if (site) {
               searchOptions.siteSearch = site;
-            } else {
-              // Disabled by popular demand
-              // throw new Error('Invalid keyword.');
+              return of({});
             }
+            return throwError(invalidKeywordError);
           }),
         )
       : of({})
@@ -138,3 +137,5 @@ export class ServerProvider {
     );
   }
 }
+
+export const invalidKeywordError = 'Invalid keyword.';

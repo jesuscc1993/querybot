@@ -1,0 +1,16 @@
+{
+  "configurations": [
+    {
+      "console": "integratedTerminal",
+      "name": "Launch Program",
+      "outFiles": ["${workspaceFolder}/build/**/*.js"],
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "program": "${workspaceFolder}\\src\\app.ts",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "type": "node"
+    }
+  ],
+  "version": "0.2.0"
+}

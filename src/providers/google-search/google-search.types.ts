@@ -1,3 +1,7 @@
+export type GoogleSearchError = {
+  message: string;
+};
+
 export type GoogleSearchOptions = {
   [key: string]: any;
   cx: string;
@@ -10,6 +14,7 @@ export type GoogleSearchOptions = {
 
 export type GoogleSearchResult = {
   items: GoogleSearchResultItem[];
+  error?: GoogleSearchError;
 };
 
 export type GoogleSearchResultItem = {

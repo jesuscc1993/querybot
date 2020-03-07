@@ -1,18 +1,4 @@
 {
-  "name": "querybot",
-  "version": "1.0.0",
-  "description": "Provides web search functionalities with custom scopes",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jesuscc1993/querybot"
-  },
-  "main": "build/app.js",
-  "scripts": {
-    "build": "tsc",
-    "lint": "tsc --noEmit",
-    "serve": "node build/app.js",
-    "start": "tsc && npm run serve"
-  },
   "dependencies": {
     "discord-bot": "jesuscc1993/discord-bot#dist",
     "discord.js": "^12.0.1",
@@ -22,6 +8,7 @@
     "rxjs": "^6.5.3",
     "winston": "^3.2.1"
   },
+  "description": "Provides web search functionalities with custom scopes",
   "devDependencies": {
     "@types/mongodb": "^3.3.8",
     "@types/mongoose": "^5.5.28",
@@ -29,10 +16,24 @@
     "@types/request": "^2.47.1",
     "typescript": "^3.7.5"
   },
+  "license": "CC-BY-NC-SA-4.0",
+  "main": "build/app.js",
+  "name": "querybot",
   "prettier": {
     "printWidth": 120,
     "semi": true,
     "singleQuote": true,
     "trailingComma": "all"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jesuscc1993/querybot"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "tsc --noEmit",
+    "serve": "node build/app.js",
+    "start": "yarn build && yarn serve"
+  },
+  "version": "1.0.0"
 }

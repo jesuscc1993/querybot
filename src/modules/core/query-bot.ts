@@ -1,6 +1,10 @@
-import { DiscordBot, DiscordBotCommandMetadata, DiscordBotLogger } from 'discord-bot';
-import { Guild, Message, TextChannel } from 'discord.js';
-import { Observable, of } from 'rxjs';
+import {
+  DiscordBot,
+  DiscordBotCommandMetadata,
+  DiscordBotLogger,
+} from 'discord-bot';
+import { ActivityOptions, Guild, Message, TextChannel } from 'discord.js';
+import { of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 import {
@@ -82,6 +86,11 @@ export class QueryBot {
     });
   }
 
+  private logGuildCount() {
+    const guildCount = this.discordBot.getGuilds().size;
+    this.logger.info(`${this.className}: Currently running on ${guildCount} servers`);
+  }
+
   private mapCommand(
     command: (
       discordBot: DiscordBot,
@@ -96,16 +105,8 @@ export class QueryBot {
     };
   }
 
-  private onLoad() {
-    this.discordBot.setActivityMessage(`${botPrefix} help`, { type: 'LISTENING' });
-    this.logGuildCount();
-  }
-
-  private onMention(message: Message) {
-    this.discordBot.sendMessage(
-      message,
-      `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix} help\`.`,
-    );
+  private onError(error: Error | string, functionName: string) {
+    return outputError(this.logger, error, `${this.className}.${functionName}`);
   }
 
   private onGuildJoined(guild: Guild) {
@@ -125,20 +126,25 @@ export class QueryBot {
         tap(() => {
           this.logger.info(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
         }),
-        catchError(error => {
-          return of(this.onError(error, `onGuildLeft`));
-        }),
+        catchError(error => of(this.onError(error, `onGuildLeft`))),
       )
       .subscribe();
     this.logGuildCount();
   }
 
-  private logGuildCount() {
-    const guildCount = this.discordBot.getClient().guilds.cache.size;
-    this.logger.info(`${this.className}: Currently running on ${guildCount} servers`);
+  private onLoad() {
+    this.setActivityMessage(`${botPrefix} help`, { type: 'LISTENING' });
+    this.logGuildCount();
   }
 
-  private onError(error: Error | string, functionName: string) {
-    outputError(this.logger, error, `${this.className}.${functionName}`);
+  private onMention(message: Message) {
+    this.discordBot.sendMessage(
+      message,
+      `Do you need something from me?\nYou can see my commands by sending the message \`${botPrefix} help\`.`,
+    );
+  }
+
+  private setActivityMessage(activityMessage: string, activityOptions: ActivityOptions) {
+    this.discordBot.setActivityMessage(activityMessage, activityOptions);
   }
 }

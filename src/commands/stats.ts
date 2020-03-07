@@ -5,12 +5,13 @@ import { getDateTime } from '../domain';
 import { botColor } from '../settings';
 
 export const displayStats = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
-  const client = discordBot.getClient();
-  const guildCount = client.guilds.cache.size;
+  const statistics = [];
 
-  const statistics = [`Running on ${guildCount} servers`];
-  if (client.uptime)
-    statistics.push(`Running since ${getDateTime(new Date(new Date().getTime() - client.uptime))} (server time)`);
+  const guildCount = discordBot.getGuilds().size;
+  statistics.push([`Running on ${guildCount} servers`]);
+
+  const { uptime } = discordBot.getClient();
+  if (uptime) statistics.push(`Running since ${getDateTime(new Date(new Date().getTime() - uptime))} (server time)`);
 
   discordBot.sendMessage(message, undefined, {
     embed: {
