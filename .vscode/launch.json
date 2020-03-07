@@ -4,7 +4,7 @@
       "console": "integratedTerminal",
       "name": "Launch Program",
       "outFiles": ["${workspaceFolder}/build/**/*.js"],
-      "preLaunchTask": "tsc: build - tsconfig.json",
+      "preLaunchTask": "tsc: build - tsconfig.debug.json",
       "program": "${workspaceFolder}\\src\\app.ts",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
