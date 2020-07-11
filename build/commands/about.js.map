@@ -1,0 +1,1 @@
+{"version":3,"file":"about.js","sourceRoot":"","sources":["../../src/commands/about.ts"],"names":[],"mappings":";;AAGA,wCAAuC;AAE1B,QAAA,YAAY,GAAG,UAAC,UAAsB,EAAE,OAAgB,EAAE,KAAa,EAAE,UAAoB;IACxG,UAAU,CAAC,WAAW,CAAC,OAAO,EAAE,SAAS,EAAE;QACzC,KAAK,EAAE;YACL,KAAK,EAAE,mBAAQ;YACf,WAAW,EAAE,+YAQuD;SACrE;KACF,CAAC,CAAC;AACL,CAAC,CAAC"}
