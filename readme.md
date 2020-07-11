@@ -29,7 +29,7 @@ npm i
 ## Configuration
 
 The project requires a settings.ts file to be created.
-A settings.example.ts file exists with all the fields required.
+Settings example files exists under `/src/settings/examples`.
 In order to generate a Discord authToken, follow [this tutorial](https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/) up to step 3.
 
 ## Run
