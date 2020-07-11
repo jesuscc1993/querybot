@@ -33,10 +33,7 @@
     "url": "https://github.com/jesuscc1993/querybot"
   },
   "scripts": {
-    "build": "tsc",
-    "lint": "tsc --noEmit",
-    "serve": "node build/app.js",
-    "start": "tsc && npm run serve"
+    "start": "node build/app.js"
   },
   "version": "1.0.0"
 }
