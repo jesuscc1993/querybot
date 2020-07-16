@@ -71,14 +71,12 @@ var ServerProvider = /** @class */ (function () {
         var _this = this;
         var searchOptions = Object.assign({ num: 1, safe: nsfw ? 'off' : 'active' }, this.searchOptions);
         return (keyword
-            ? this.getSiteKeyword(serverId, keyword).pipe(operators_1.tap(function (site) {
+            ? this.getSiteKeyword(serverId, keyword).pipe(operators_1.flatMap(function (site) {
                 if (site) {
                     searchOptions.siteSearch = site;
+                    return rxjs_1.of({});
                 }
-                else {
-                    // Disabled by popular demand
-                    // throw new Error('Invalid keyword.');
-                }
+                return rxjs_1.throwError(exports.invalidKeywordError);
             }))
             : rxjs_1.of({})).pipe(operators_1.flatMap(function () { return _this.googleSearchProvider.search(query, searchOptions); }));
     };
@@ -117,3 +115,4 @@ var ServerProvider = /** @class */ (function () {
     return ServerProvider;
 }());
 exports.ServerProvider = ServerProvider;
+exports.invalidKeywordError = 'Invalid keyword.';

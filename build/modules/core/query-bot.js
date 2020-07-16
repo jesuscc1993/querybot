@@ -51,18 +51,18 @@ var QueryBot = /** @class */ (function () {
             onMention: this.onMention.bind(this),
         });
     };
+    QueryBot.prototype.logGuildCount = function () {
+        var guildCount = this.discordBot.getGuilds().size;
+        this.logger.info(this.className + ": Currently running on " + guildCount + " servers");
+    };
     QueryBot.prototype.mapCommand = function (command) {
         var _this = this;
         return function (message, input, parameters, metadata) {
             command(_this.discordBot, message, input, parameters, metadata);
         };
     };
-    QueryBot.prototype.onLoad = function () {
-        this.discordBot.setActivityMessage(settings_1.botPrefix + " help", { type: 'LISTENING' });
-        this.logGuildCount();
-    };
-    QueryBot.prototype.onMention = function (message) {
-        this.discordBot.sendMessage(message, "Do you need something from me?\nYou can see my commands by sending the message `" + settings_1.botPrefix + " help`.");
+    QueryBot.prototype.onError = function (error, functionName) {
+        return domain_1.outputError(this.logger, error, this.className + "." + functionName);
     };
     QueryBot.prototype.onGuildJoined = function (guild) {
         var systemChannel = guild.systemChannel;
@@ -77,18 +77,19 @@ var QueryBot = /** @class */ (function () {
             .deleteServerById(guild.id)
             .pipe(operators_1.tap(function () {
             _this.logger.info(_this.className + ": Deleted database entry for guild " + guild.id + " (\"" + guild.name + "\")");
-        }), operators_1.catchError(function (error) {
-            return rxjs_1.of(_this.onError(error, "onGuildLeft"));
-        }))
+        }), operators_1.catchError(function (error) { return rxjs_1.of(_this.onError(error, "onGuildLeft")); }))
             .subscribe();
         this.logGuildCount();
     };
-    QueryBot.prototype.logGuildCount = function () {
-        var guildCount = this.discordBot.getClient().guilds.cache.size;
-        this.logger.info(this.className + ": Currently running on " + guildCount + " servers");
+    QueryBot.prototype.onLoad = function () {
+        this.setActivityMessage(settings_1.botPrefix + " help", { type: 'LISTENING' });
+        this.logGuildCount();
     };
-    QueryBot.prototype.onError = function (error, functionName) {
-        domain_1.outputError(this.logger, error, this.className + "." + functionName);
+    QueryBot.prototype.onMention = function (message) {
+        this.discordBot.sendMessage(message, "Do you need something from me?\nYou can see my commands by sending the message `" + settings_1.botPrefix + " help`.");
+    };
+    QueryBot.prototype.setActivityMessage = function (activityMessage, activityOptions) {
+        this.discordBot.setActivityMessage(activityMessage, activityOptions);
     };
     return QueryBot;
 }());

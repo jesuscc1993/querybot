@@ -40,6 +40,8 @@ exports.query = function (discordBot, message, input, parameters, metadata) {
                     });
                 }
             }), operators_1.catchError(function (error) {
+                if (error === providers_1.invalidKeywordError)
+                    return rxjs_1.of();
                 domain_1.outputError(discordBot.logger, error, "ServerProvider.getInstance().search", [
                     guild_1.id,
                     search_1,

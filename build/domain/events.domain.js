@@ -14,7 +14,7 @@ exports.setupEventHandlers = function (logger) {
         logger.error("Rejection handled: " + promise);
     });
     process.on('uncaughtException', function (error) {
-        logger.error("Caught exception: " + error);
+        logger.error("Uncaught exception: " + error);
     });
     process.on('warning', function (warning) {
         logger.error("Process warning: " + warning.name + "\nMessage: " + warning.message + "\nStack trace:\n" + warning.trace);

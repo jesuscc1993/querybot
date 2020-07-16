@@ -25,6 +25,8 @@ var GoogleSearchProvider = /** @class */ (function () {
                 }
                 else {
                     var googleSearchResult = JSON.parse(response.toJSON().body);
+                    if (googleSearchResult.error)
+                        observer.error(googleSearchResult.error.message);
                     observer.next(googleSearchResult.items || []);
                     observer.complete();
                 }
