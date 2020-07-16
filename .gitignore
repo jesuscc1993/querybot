@@ -6,5 +6,4 @@
 /logs/*
 !/logs/.gitkeep
 /node_modules
-src/settings/settings.ts
 npm-debug.log
