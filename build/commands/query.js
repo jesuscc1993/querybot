@@ -20,7 +20,6 @@ exports.query = function (discordBot, message, input, parameters, metadata) {
     if ((!keywordSearch || keyword) && parameters.length) {
         var search_1 = parameters.join(' ');
         var nsfw_1 = message.channel.nsfw;
-        console.log('search, keyword', search_1, keyword);
         var guild_1 = message.guild;
         if (guild_1) {
             providers_1.ServerProvider.getInstance()
