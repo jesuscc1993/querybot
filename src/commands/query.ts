@@ -37,8 +37,6 @@ export const query = (
     const search: string = parameters.join(' ');
     const nsfw: boolean = (<TextChannel>message.channel).nsfw;
 
-    console.log('search, keyword', search, keyword);
-
     const { guild } = message;
     if (guild) {
       ServerProvider.getInstance()

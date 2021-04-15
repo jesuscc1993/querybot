@@ -40,5 +40,5 @@
     "serve": "node build/app.js",
     "start": "yarn build && yarn serve"
   },
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
