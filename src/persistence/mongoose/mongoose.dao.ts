@@ -24,7 +24,7 @@ export class MongooseDao implements IDao {
   }
 
   public connect(databaseUrl: string, databaseName: string) {
-    return from(connect(`${databaseUrl}/${databaseName}`, connectionOptions)).pipe(map(_ => undefined));
+    return from(connect(`${databaseUrl}/${databaseName}`, connectionOptions)).pipe(map((_) => undefined));
   }
 
   protected info(message: string) {
