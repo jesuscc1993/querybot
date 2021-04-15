@@ -11,11 +11,6 @@
     "winston": "^3.2.1"
   },
   "description": "Provides web search functionalities with custom scopes",
-  "devDependencies": {
-    "@types/node": "^12.12.6",
-    "@types/request": "^2.47.1",
-    "typescript": "^3.7.5"
-  },
   "engines": {
     "node": ">=12.18",
     "yarn": ">=1.16"
