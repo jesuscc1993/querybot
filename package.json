@@ -1,10 +1,10 @@
 {
   "dependencies": {
-    "discord-bot": "jesuscc1993/discord-bot#dist",
+    "discord-bot": "jesuscc1993/discord-bot#6e1f60f",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "mongodb": "^3.3.2",
-    "mongoose": "^5.9.3",
+    "mongoose": "5.12.3",
     "request": "^2.88.0",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.0",
@@ -12,15 +12,13 @@
   },
   "description": "Provides web search functionalities with custom scopes",
   "devDependencies": {
-    "@types/mongodb": "^3.3.8",
-    "@types/mongoose": "^5.5.28",
     "@types/node": "^12.12.6",
     "@types/request": "^2.47.1",
     "typescript": "^3.7.5"
   },
   "engines": {
-    "node": "12.15.0",
-    "yarn": "1.16.0"
+    "node": ">=12.18",
+    "yarn": ">=1.16"
   },
   "license": "CC-BY-NC-SA-4.0",
   "main": "build/app.js",
@@ -38,5 +36,5 @@
   "scripts": {
     "start": "node build/app.js"
   },
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

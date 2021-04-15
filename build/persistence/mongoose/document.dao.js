@@ -24,7 +24,7 @@ var DocumentDao = /** @class */ (function (_super) {
     DocumentDao.prototype.updateDocument = function (source, documentFilters, document) {
         var _this = this;
         return new rxjs_1.Observable(function (observer) {
-            source.updateOne(documentFilters, document, function (error, response) {
+            source.updateOne(documentFilters, document, undefined, function (error, response) {
                 if (error)
                     observer.error(error);
                 observer.next(document.toObject());
@@ -71,7 +71,7 @@ var DocumentDao = /** @class */ (function (_super) {
     DocumentDao.prototype.deleteDocument = function (source, documentFilters, document) {
         var _this = this;
         return new rxjs_1.Observable(function (observer) {
-            source.deleteOne(documentFilters, function (error) {
+            source.deleteOne(documentFilters, undefined, function (error) {
                 if (error)
                     observer.error(error);
                 observer.next(document.toObject());
