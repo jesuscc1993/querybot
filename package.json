@@ -19,8 +19,8 @@
     "typescript": "^3.7.5"
   },
   "engines": {
-    "node": "12.15.0",
-    "yarn": "1.16.0"
+    "node": ">=12.18",
+    "yarn": ">=1.16"
   },
   "license": "CC-BY-NC-SA-4.0",
   "main": "build/app.js",

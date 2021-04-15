@@ -37,12 +37,14 @@ export const query = (
     const search: string = parameters.join(' ');
     const nsfw: boolean = (<TextChannel>message.channel).nsfw;
 
+    console.log('search, keyword', search, keyword);
+
     const { guild } = message;
     if (guild) {
       ServerProvider.getInstance()
         .search(guild.id, search, nsfw, keyword)
         .pipe(
-          tap(searchResultItems => {
+          tap((searchResultItems) => {
             const messageText = `This is what I found:`;
 
             if (!searchResultItems.length) {
@@ -58,7 +60,7 @@ export const query = (
               });
             }
           }),
-          catchError(error => {
+          catchError((error) => {
             if (error === invalidKeywordError) return of();
 
             outputError(discordBot.logger, error, `ServerProvider.getInstance().search`, [
