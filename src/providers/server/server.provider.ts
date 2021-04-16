@@ -52,7 +52,7 @@ export class ServerProvider {
 
   public unsetSiteKeyword(serverId: string, keyword: string) {
     return this.getServerSiteKeywordsMapOrSetDefaults(serverId).pipe(
-      flatMap(keywordsMap => {
+      flatMap((keywordsMap) => {
         if (!keywordsMap[keyword]) {
           throw new Error(`Keyword "${keyword}" does not exist.`);
         }
@@ -71,7 +71,7 @@ export class ServerProvider {
     return (this.serverSiteKeywordsMap[serverId]
       ? of(this.serverSiteKeywordsMap[serverId])
       : this.getServerSiteKeywordsMapOrSetDefaults(serverId)
-    ).pipe(map(keywordsMap => keywordsMap[keyword]));
+    ).pipe(map((keywordsMap) => keywordsMap[keyword]));
   }
 
   public getServerSiteKeywords(serverId: string) {
@@ -79,7 +79,7 @@ export class ServerProvider {
   }
 
   private siteMapToArray = (keywordsMap: KeywordsMap) => {
-    return Object.keys(keywordsMap).map(keyword => ({ keyword: keyword, url: keywordsMap[keyword] }));
+    return Object.keys(keywordsMap).map((keyword) => ({ keyword: keyword, url: keywordsMap[keyword] }));
   };
 
   public search(serverId: string, query: string, nsfw: boolean, keyword?: string) {
@@ -90,7 +90,7 @@ export class ServerProvider {
 
     return (keyword
       ? this.getSiteKeyword(serverId, keyword).pipe(
-          flatMap(site => {
+          flatMap((site) => {
             if (site) {
               searchOptions.siteSearch = site;
               return of({});
@@ -112,7 +112,7 @@ export class ServerProvider {
     return this.serverDao.createOrUpdate(server).pipe(tap(this.updateKeywordsFromServer));
   }
   public deleteServerById(serverId: string) {
-    return this.serverDao.deleteById(serverId).pipe(tap(_ => delete this.serverSiteKeywordsMap[serverId]));
+    return this.serverDao.deleteById(serverId).pipe(tap((_) => delete this.serverSiteKeywordsMap[serverId]));
   }
   public findServerById(serverId: string): Observable<ServerModel | undefined> {
     return this.serverDao.findById(serverId);
@@ -127,11 +127,11 @@ export class ServerProvider {
 
   private getServerSiteKeywordsMapOrSetDefaults(serverId: string) {
     return this.serverDao.findById(serverId).pipe(
-      flatMap(server =>
+      flatMap((server) =>
         server ? of(server) : this.saveServer({ _id: serverId, keywordsMap: { ...defaultSiteKeywordsMap } }),
       ),
       map(({ keywordsMap }) => keywordsMap),
-      tap(keywordsMap => {
+      tap((keywordsMap) => {
         this.serverSiteKeywordsMap[serverId] = keywordsMap;
       }),
     );

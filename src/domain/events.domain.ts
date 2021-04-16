@@ -1,4 +1,4 @@
-import { DiscordBotLogger } from 'discord-bot/dist/discord-bot.types';
+import { DiscordBotLogger } from 'discord-bot';
 
 export const setupEventHandlers = (logger: DiscordBotLogger) => {
   const unhandledRejections: Map<Promise<any>, string> = new Map();

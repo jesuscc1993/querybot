@@ -9,22 +9,23 @@ import { botPrefix } from '../settings';
 
 export const setSiteKeyword = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   if (parameters.length >= 2) {
-    if (!message.member?.hasPermission('ADMINISTRATOR')) {
-      discordBot.sendError(message, `\`\`${botPrefix} set\`\` command is restricted to administrators.`);
+    const { guild, member } = message;
+
+    if (!member?.hasPermission('MANAGE_GUILD')) {
+      discordBot.sendError(message, `\`\`${botPrefix} set\`\` command requires the "Manage Server" permission.`);
       return;
     }
 
-    const { guild } = message;
     if (guild) {
-      const keyword: string = parameters[0];
-      const site: string = parameters[1];
+      const [keyword, site] = parameters;
+
       ServerProvider.getInstance()
         .setSiteKeyword(guild.id, keyword, site)
         .pipe(
           tap(() => {
             discordBot.sendMessage(message, `Successfully set site "${site}" to keyword "${keyword}".`);
           }),
-          catchError(error => {
+          catchError((error) => {
             outputError(discordBot.logger, error, `ServerProvider.getInstance().setSiteKeyword`, [
               guild.id,
               keyword,

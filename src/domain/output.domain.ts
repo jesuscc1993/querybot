@@ -1,4 +1,4 @@
-import { DiscordBotLogger } from 'discord-bot/dist/discord-bot.types';
+import { DiscordBotLogger } from 'discord-bot';
 
 export const outputError = (
   logger: DiscordBotLogger,

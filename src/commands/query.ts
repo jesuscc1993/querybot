@@ -1,4 +1,8 @@
-import { DiscordBot, DiscordBotCommandMetadata } from 'discord-bot';
+import {
+  DiscordBot,
+  DiscordBotCommandMetadata,
+  lineContainsPrefix,
+} from 'discord-bot';
 import { Message, TextChannel } from 'discord.js';
 import { of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
@@ -30,12 +34,12 @@ export const query = (
     return;
   }
 
-  const keywordSearch: boolean = !input.includes(`${botPrefix} `);
+  const keywordSearch = !input.includes(`${botPrefix} `);
   const keyword = keywordSearch ? input.split(' ')[0].substring(botPrefixDefault.length) : undefined;
 
   if ((!keywordSearch || keyword) && parameters.length) {
-    const search: string = parameters.join(' ');
-    const nsfw: boolean = (<TextChannel>message.channel).nsfw;
+    const search = parameters.join(' ');
+    const nsfw = (<TextChannel>message.channel).nsfw;
 
     const { guild } = message;
     if (guild) {
@@ -75,10 +79,6 @@ export const query = (
   } else if (!keywordSearch) {
     discordBot.onWrongParameterCount(message);
   }
-};
-
-const lineContainsPrefix = (line: string, prefix: string): boolean => {
-  return line.indexOf(prefix) === 0 && line.substring(prefix.length).charAt(0) !== ' ';
 };
 
 /*const getEmbedFromGoogleSearchResultItem = (discordBot: DiscordBot, searchResultItem: GoogleSearchResultItem): MessageOptions => {

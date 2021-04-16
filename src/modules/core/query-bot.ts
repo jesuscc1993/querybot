@@ -51,7 +51,7 @@ export class QueryBot {
           this.initializeBot();
           this.logger.info(`${this.className}: Database connection successfully established`);
         }),
-        catchError(error => {
+        catchError((error) => {
           return of(this.onError(error, `constructor`));
         }),
       )
@@ -126,7 +126,7 @@ export class QueryBot {
         tap(() => {
           this.logger.info(`${this.className}: Deleted database entry for guild ${guild.id} ("${guild.name}")`);
         }),
-        catchError(error => of(this.onError(error, `onGuildLeft`))),
+        catchError((error) => of(this.onError(error, `onGuildLeft`))),
       )
       .subscribe();
     this.logGuildCount();
