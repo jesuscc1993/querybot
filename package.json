@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "discord-bot": "jesuscc1993/discord-bot#6e1f60f",
+    "discord-bot": "jesuscc1993/discord-bot#803c627",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "mongodb": "^3.3.2",
@@ -31,5 +31,5 @@
   "scripts": {
     "start": "node build/app.js"
   },
-  "version": "1.0.3"
+  "version": "1.0.4"
 }

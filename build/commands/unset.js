@@ -8,11 +8,11 @@ var settings_1 = require("../settings");
 exports.unsetSiteKeyword = function (discordBot, message, input, parameters) {
     var _a;
     if (parameters.length >= 1) {
-        if (!((_a = message.member) === null || _a === void 0 ? void 0 : _a.hasPermission('ADMINISTRATOR'))) {
-            discordBot.sendError(message, "``" + settings_1.botPrefix + " unset`` command is restricted to administrators.");
+        var guild_1 = message.guild, member = message.member;
+        if (!((_a = member) === null || _a === void 0 ? void 0 : _a.hasPermission('MANAGE_GUILD'))) {
+            discordBot.sendError(message, "``" + settings_1.botPrefix + " unset`` command requires the \"Manage Server\" permission.");
             return;
         }
-        var guild_1 = message.guild;
         if (guild_1) {
             var keyword_1 = parameters[0];
             providers_1.ServerProvider.getInstance()

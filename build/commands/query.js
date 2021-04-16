@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var discord_bot_1 = require("discord-bot");
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var domain_1 = require("../domain");
@@ -8,7 +9,7 @@ var settings_1 = require("../settings");
 exports.query = function (discordBot, message, input, parameters, metadata) {
     var commandCount = message.content
         .split('\n')
-        .reduce(function (count, line) { return count + (lineContainsPrefix(line, settings_1.botPrefixDefault) ? 1 : 0); }, 0);
+        .reduce(function (count, line) { return count + (discord_bot_1.lineContainsPrefix(line, settings_1.botPrefixDefault) ? 1 : 0); }, 0);
     if (commandCount > 1) {
         if (metadata.commandIndex === 0) {
             discordBot.sendError(message, 'Search command is restricted to one usage per message.');
@@ -56,9 +57,6 @@ exports.query = function (discordBot, message, input, parameters, metadata) {
     else if (!keywordSearch) {
         discordBot.onWrongParameterCount(message);
     }
-};
-var lineContainsPrefix = function (line, prefix) {
-    return line.indexOf(prefix) === 0 && line.substring(prefix.length).charAt(0) !== ' ';
 };
 /*const getEmbedFromGoogleSearchResultItem = (discordBot: DiscordBot, searchResultItem: GoogleSearchResultItem): MessageOptions => {
   let description: string = '';

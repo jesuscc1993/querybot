@@ -6,10 +6,7 @@ exports.getDate = function (date) {
 };
 exports.getDateTime = function (date) {
     if (date === void 0) { date = new Date(); }
-    return date
-        .toISOString()
-        .split('.')[0]
-        .replace('T', ' ');
+    return date.toISOString().split('.')[0].replace('T', ' ');
 };
 exports.getTime = function (date) {
     if (date === void 0) { date = new Date(); }

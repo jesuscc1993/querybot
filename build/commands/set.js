@@ -8,14 +8,13 @@ var settings_1 = require("../settings");
 exports.setSiteKeyword = function (discordBot, message, input, parameters) {
     var _a;
     if (parameters.length >= 2) {
-        if (!((_a = message.member) === null || _a === void 0 ? void 0 : _a.hasPermission('ADMINISTRATOR'))) {
-            discordBot.sendError(message, "``" + settings_1.botPrefix + " set`` command is restricted to administrators.");
+        var guild_1 = message.guild, member = message.member;
+        if (!((_a = member) === null || _a === void 0 ? void 0 : _a.hasPermission('MANAGE_GUILD'))) {
+            discordBot.sendError(message, "``" + settings_1.botPrefix + " set`` command requires the \"Manage Server\" permission.");
             return;
         }
-        var guild_1 = message.guild;
         if (guild_1) {
-            var keyword_1 = parameters[0];
-            var site_1 = parameters[1];
+            var keyword_1 = parameters[0], site_1 = parameters[1];
             providers_1.ServerProvider.getInstance()
                 .setSiteKeyword(guild_1.id, keyword_1, site_1)
                 .pipe(operators_1.tap(function () {
