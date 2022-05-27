@@ -14,9 +14,11 @@ export const displayStats = (discordBot: DiscordBot, message: Message, input: st
   if (uptime) statistics.push(`Running since ${getDateTime(new Date(new Date().getTime() - uptime))} (server time)`);
 
   discordBot.sendMessage(message, undefined, {
-    embed: {
-      color: botColor,
-      description: `**# Statistics:**\n${statistics.join(`\n`)}`,
-    },
+    embeds: [
+      {
+        color: botColor,
+        description: `**# Statistics:**\n${statistics.join(`\n`)}`,
+      },
+    ],
   });
 };

@@ -5,9 +5,10 @@ import { botColor, botPrefix, botPrefixDefault } from '../settings';
 
 export const displayHelp = (discordBot: DiscordBot, message: Message, input: string, parameters: string[]) => {
   discordBot.sendMessage(message, undefined, {
-    embed: {
-      color: botColor,
-      description: `**# Commands:**
+    embeds: [
+      {
+        color: botColor,
+        description: `**# Commands:**
 
       **\`${botPrefix} about\`**
       Displays information about the bot.
@@ -37,6 +38,7 @@ export const displayHelp = (discordBot: DiscordBot, message: Message, input: str
       Got an issue or suggestion? You can report them here:
       [github.com](https://github.com/jesuscc1993/querybot/issues)
       `,
-    },
+      },
+    ],
   });
 };

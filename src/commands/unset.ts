@@ -11,7 +11,7 @@ export const unsetSiteKeyword = (discordBot: DiscordBot, message: Message, input
   if (parameters.length >= 1) {
     const { guild, member } = message;
 
-    if (!member?.hasPermission('MANAGE_GUILD')) {
+    if (!member?.permissions.has('MANAGE_GUILD')) {
       discordBot.sendError(message, `\`\`${botPrefix} unset\`\` command requires the "Manage Server" permission.`);
       return;
     }

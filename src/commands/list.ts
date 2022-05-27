@@ -24,11 +24,13 @@ export const listSites = (discordBot: DiscordBot, message: Message, input: strin
             list = list.substring(0, list.length - 1); // remove last line break
 
             discordBot.sendMessage(message, undefined, {
-              embed: {
-                color: botColor,
-                title: 'Available keywords',
-                description: `${list}`,
-              },
+              embeds: [
+                {
+                  color: botColor,
+                  title: 'Available keywords',
+                  description: `${list}`,
+                },
+              ],
             });
           } else {
             discordBot.sendMessage(

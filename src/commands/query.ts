@@ -1,18 +1,10 @@
-import {
-  DiscordBot,
-  DiscordBotCommandMetadata,
-  lineContainsPrefix,
-} from 'discord-bot';
+import { DiscordBot, DiscordBotCommandMetadata, lineContainsPrefix } from 'discord-bot';
 import { Message, TextChannel } from 'discord.js';
 import { of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 import { outputError } from '../domain';
-import {
-  GoogleSearchResultItem,
-  invalidKeywordError,
-  ServerProvider,
-} from '../providers';
+import { GoogleSearchResultItem, invalidKeywordError, ServerProvider } from '../providers';
 import { botPrefix, botPrefixDefault } from '../settings';
 
 export const query = (
@@ -92,11 +84,11 @@ export const query = (
   }
 
   return {
-    embed: {
+    embeds: [{
       color: botColor,
       description: description,
       image: image
-    }
+    }]
   };
 
 };

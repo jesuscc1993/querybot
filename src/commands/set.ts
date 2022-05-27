@@ -11,7 +11,7 @@ export const setSiteKeyword = (discordBot: DiscordBot, message: Message, input: 
   if (parameters.length >= 2) {
     const { guild, member } = message;
 
-    if (!member?.hasPermission('MANAGE_GUILD')) {
+    if (!member?.permissions.has('MANAGE_GUILD')) {
       discordBot.sendError(message, `\`\`${botPrefix} set\`\` command requires the "Manage Server" permission.`);
       return;
     }

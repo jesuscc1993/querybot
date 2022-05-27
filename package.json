@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "discord-bot": "jesuscc1993/discord-bot#803c627",
-    "discord.js": "^12.2.0",
+    "discord-bot": "jesuscc1993/discord-bot#e1bd84a",
+    "discord.js": "^13.7.0",
     "dotenv": "^8.2.0",
     "mongodb": "^3.3.2",
     "mongoose": "5.12.3",
@@ -12,9 +12,9 @@
   },
   "description": "Provides web search functionalities with custom scopes",
   "devDependencies": {
-    "@types/node": "^12.12.6",
+    "@types/node": "^16.11.7",
     "@types/request": "^2.47.1",
-    "typescript": "^3.7.5"
+    "typescript": "^4.6.3"
   },
   "engines": {
     "node": ">=12.18",

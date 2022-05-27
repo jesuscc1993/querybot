@@ -1,33 +1,16 @@
-import {
-  DiscordBot,
-  DiscordBotCommandMetadata,
-  DiscordBotLogger,
-} from 'discord-bot';
-import { ActivityOptions, Guild, Message, TextChannel } from 'discord.js';
+import { DiscordBot, DiscordBotCommandMetadata, DiscordBotLogger } from 'discord-bot';
+import { ActivityOptions, Guild, Intents, Message, TextChannel } from 'discord.js';
 import { of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 import {
-  displayAbout,
-  displayHelp,
-  displayStats,
-  listSites,
-  query,
-  setSiteKeyword,
-  unsetSiteKeyword,
+  displayAbout, displayHelp, displayStats, listSites, query, setSiteKeyword, unsetSiteKeyword,
 } from '../../commands';
 import { outputError } from '../../domain';
 import { ServerProvider } from '../../providers';
 import {
-  botAuthToken,
-  botPrefix,
-  botPrefixDefault,
-  databaseName,
-  databaseUrl,
-  googleSearchApiKey,
-  googleSearchCx,
-  maximumGuildBotsPercentage,
-  minimumGuildMembersForFarmCheck,
+  botAuthToken, botPrefix, botPrefixDefault, databaseName, databaseUrl, googleSearchApiKey,
+  googleSearchCx, maximumGuildBotsPercentage, minimumGuildMembersForFarmCheck,
 } from '../../settings';
 
 export class QueryBot {
@@ -76,6 +59,14 @@ export class QueryBot {
       },
       botPrefix,
       botPrefixDefault,
+      clientOptions: {
+        intents: [
+          Intents.FLAGS.DIRECT_MESSAGES,
+          Intents.FLAGS.GUILDS,
+          Intents.FLAGS.GUILD_MEMBERS,
+          Intents.FLAGS.GUILD_MESSAGES,
+        ],
+      },
       logger: this.logger,
       maximumGuildBotsPercentage,
       minimumGuildMembersForFarmCheck,
