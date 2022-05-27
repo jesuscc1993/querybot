@@ -32,6 +32,13 @@ The project requires a .env file to be created.
 A .example.env file exists with all the fields required.
 In order to generate a Discord authToken, follow [this tutorial](https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/) up to step 3.
 
+Make sure the bot config on the [Discord Developer Portal](https://discord.com/developers/applications/) includes the following intents:
+
+- DIRECT_MESSAGES
+- GUILDS
+- GUILD_MEMBERS
+- GUILD_MESSAGES
+
 ## Run
 
 1. Set up up your settings.ts (more information in the configuration section)
