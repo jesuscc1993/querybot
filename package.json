@@ -5,7 +5,7 @@
     "dotenv": "^8.2.0",
     "mongodb": "^3.3.2",
     "mongoose": "5.13.14",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.0",
     "winston": "^3.2.1"
